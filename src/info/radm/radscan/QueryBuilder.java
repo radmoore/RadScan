@@ -33,7 +33,7 @@ public class QueryBuilder implements RADSQuery{
 		StringBuilder qString = new StringBuilder();
 		qString.append(RADSRunner.RADSBaseUrl);
 		try {
-		qString.append("apicall=1&algorithm=rads&gp_rampage_M=150&gp_rampage_m=-100" +
+			qString.append("apicall=1&algorithm=rads&gp_rampage_M=150&gp_rampage_m=-100" +
 				"&gp_rampage_G=-50&gp_rampage_g=-25&gp_rampage_T=-100&gp_rampage_t=-50" +
 				"&matrix=BLOSUM62&gp_rampage_I=-10&gp_rampage_i=-1&gp_rampage_E=0"+
 				"&gp_rampage_e=0&query=" + URLEncoder.encode(queryString, "utf8") +

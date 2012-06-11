@@ -18,8 +18,8 @@ public class RadScan {
             .withLongOpt("query")
             .create("q");
 	
-	static String testFasta = "/home/radmoore/Desktop/rads_test.fa";
-	static String testXdom = "/home/radmoore/Desktop/rads_test.xdom";
+	static String testFasta = "/home/radmoore/Dropbox/work/rads/RADSCAN/test/data/rads_test.fa";
+	//static String testXdom = "/home/radmoore/Dropbox/work/rads/RADSCAN/test/data/rads_test.xdom";
 	
 	public static void main (String[] args) {
 		

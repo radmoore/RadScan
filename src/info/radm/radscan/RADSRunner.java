@@ -1,5 +1,7 @@
 package info.radm.radscan;
 
+import info.radm.radscan.utils.ProgressBar;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,9 +11,12 @@ import java.net.URL;
 public class RADSRunner {
 
 	RADSQuery query;
-	public static String RADSBaseUrl = "http://localhost/rads3.pl?";
+	//public static String RADSBaseUrl = "http://localhost/rads3.pl?";
+	public static String RADSBaseUrl = "http://ebbam.uni-muenster.de/rads3.pl?";
 	private static int INTERVAL = 10000;
 	private boolean running = false;
+	private ProgressBar pBar;
+	private int state = 1;
 	
 	
 	public RADSRunner(RADSQuery query) {
@@ -21,14 +26,18 @@ public class RADSRunner {
 	public void submit() {
 		
 		BufferedReader reader = null;
+		this.pBar = new ProgressBar(500, "Scanning RADS", true);
 		
 		try {
 		//	Thread.sleep(5000);
+			this.pBar.startIntermediate();
 			reader = read( this.query.getQueryString() );
 			String line = null;
 			line = reader.readLine();
 			running = true;
 			while (line != null) {
+				
+
 				//System.out.println(line);
 				line = reader.readLine();
 				if (line.contains("preparing")) {
@@ -47,6 +56,7 @@ public class RADSRunner {
 					String[] fields = line.split("\\s+");
 					String jobUrl = fields[2].replace("\"", "");
 					System.out.println("Checking in intervals with this url: "+jobUrl);
+					this.pBar.stopIntermediate();
 					intervalCheck(jobUrl);
 				}
 			}
@@ -75,7 +85,8 @@ public class RADSRunner {
 		
 		
 		BufferedReader reader = null;
-		
+		state += 2;
+		//this.pBar.setVal(state);
 		try {
 			Thread.sleep(INTERVAL);	
 			reader = read( jobURL );
@@ -86,7 +97,7 @@ public class RADSRunner {
 				//System.out.println(line);
 				line = reader.readLine();
 				if (line.contains("running")) {
-					System.out.println("RADS job is still running. Will check again in 5.");
+					//System.out.println("RADS job is still running. Will check again in 5.");
 					reader.close();
 					intervalCheck(jobURL);
 				}
@@ -118,7 +129,9 @@ public class RADSRunner {
 	}
 	
 	
-	
+	private void updateBar() {
+		
+	}
 	
 	private BufferedReader read(String url) throws IOException, MalformedURLException{
 		return new BufferedReader(new InputStreamReader(new URL(url).openStream()));}
