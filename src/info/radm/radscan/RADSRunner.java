@@ -26,11 +26,12 @@ public class RADSRunner {
 	public void submit() {
 		
 		BufferedReader reader = null;
-		this.pBar = new ProgressBar(500, "Scanning RADS", true);
+		pBar = new ProgressBar(500, "Establishing RADS connection", ProgressBar.INTERMEDIATE_MODE);
 		
 		try {
-		//	Thread.sleep(5000);
-			this.pBar.startIntermediate();
+			pBar.setIndicatorCharater(ProgressBar.SIGN_2);
+			pBar.start();
+			
 			reader = read( this.query.getQueryString() );
 			String line = null;
 			line = reader.readLine();
@@ -41,22 +42,26 @@ public class RADSRunner {
 				//System.out.println(line);
 				line = reader.readLine();
 				if (line.contains("preparing")) {
-					System.out.print("RADS is preparing input query... ");
+					pBar.changeMessage("RADS preparing input");
+					//System.out.print("RADS is preparing input query... ");
+					
 				}
 				if (line.contains("running")) {
-					System.out.println("done.");
+					//this.pBar.changeMessage("Submitted search job");
+					//System.out.println("done.");
 				}
-				if (line.contains("jobid: ")) {
+				if (line.contains("jobid")) {
 					String[] fields = line.split("\\s+");
 					String jid = fields[2].replace("\"", "");
-					System.out.println("RADS job is sibmitted [JOBID:" +jid +"]");
+					pBar.changeMessage("Submitted search job [ID: "+jid+"]");
+					//System.out.println("RADS job is sibmitted [JOBID:" +jid +"]");
 				}
 				if (line.contains("full_url")) {
 					System.out.println(line);
 					String[] fields = line.split("\\s+");
 					String jobUrl = fields[2].replace("\"", "");
-					System.out.println("Checking in intervals with this url: "+jobUrl);
-					this.pBar.stopIntermediate();
+					//System.out.println("Checking in intervals with this url: "+jobUrl);
+//					this.pBar.stopIntermediate();
 					intervalCheck(jobUrl);
 				}
 			}
@@ -86,7 +91,7 @@ public class RADSRunner {
 		
 		BufferedReader reader = null;
 		state += 2;
-		//this.pBar.setVal(state);
+		pBar.changeMessage("RADS scan");
 		try {
 			Thread.sleep(INTERVAL);	
 			reader = read( jobURL );
