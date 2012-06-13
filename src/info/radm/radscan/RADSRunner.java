@@ -8,12 +8,18 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * 
+ * @author <a href="http://radm.info">Andrew D. Moore</a>
+ *
+ */
 public class RADSRunner {
 
 	RADSQuery query;
 	//public static String RADSBaseUrl = "http://localhost/rads3.pl?";
-	public static String RADSBaseUrl = "http://ebbam.uni-muenster.de/rads3.pl?";
-	private static int INTERVAL = 10000;
+	//public static String RADSBaseUrl = "http://ebbam.uni-muenster.de/rads3.pl?";
+	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
+	private static int INTERVAL = 5000;
 	private boolean running = false;
 	private ProgressBar pBar;
 	private int state = 1;
@@ -29,7 +35,7 @@ public class RADSRunner {
 		pBar = new ProgressBar(500, "Establishing RADS connection", ProgressBar.INTERMEDIATE_MODE);
 		
 		try {
-			pBar.setIndicatorCharater(ProgressBar.SIGN_2);
+			//pBar.setIndicatorCharater(ProgressBar.SIGN_2);
 			pBar.start();
 			
 			reader = read( this.query.getQueryString() );
@@ -42,7 +48,7 @@ public class RADSRunner {
 				//System.out.println(line);
 				line = reader.readLine();
 				if (line.contains("preparing")) {
-					pBar.changeMessage("RADS preparing input");
+					pBar.setMessage("RADS: preparing input");
 					//System.out.print("RADS is preparing input query... ");
 					
 				}
@@ -53,15 +59,11 @@ public class RADSRunner {
 				if (line.contains("jobid")) {
 					String[] fields = line.split("\\s+");
 					String jid = fields[2].replace("\"", "");
-					pBar.changeMessage("Submitted search job [ID: "+jid+"]");
-					//System.out.println("RADS job is sibmitted [JOBID:" +jid +"]");
+					pBar.setMessage("Submitted search job [ID: "+jid+"]");
 				}
 				if (line.contains("full_url")) {
-					System.out.println(line);
 					String[] fields = line.split("\\s+");
 					String jobUrl = fields[2].replace("\"", "");
-					//System.out.println("Checking in intervals with this url: "+jobUrl);
-//					this.pBar.stopIntermediate();
 					intervalCheck(jobUrl);
 				}
 			}
@@ -85,40 +87,39 @@ public class RADSRunner {
 		return running;
 	}
 	
-	
 	private void intervalCheck(String jobURL) {
 		
 		
 		BufferedReader reader = null;
-		state += 2;
-		pBar.changeMessage("RADS scan");
+		pBar.setMessage("RADS: search running");
+		String hits = "";
 		try {
 			Thread.sleep(INTERVAL);	
 			reader = read( jobURL );
 			String line = null;
-			line = reader.readLine();
 			running = true;
-			while (line != null) {
-				//System.out.println(line);
-				line = reader.readLine();
+			while ( (line = reader.readLine()) != null) {
+				
 				if (line.contains("running")) {
-					//System.out.println("RADS job is still running. Will check again in 5.");
 					reader.close();
 					intervalCheck(jobURL);
 				}
-				if (line.contains("complete")) {
-					System.out.println("JOB IS COMPLETE!");
-					
-				}
 				if (line.contains("hits_n")) {
 					String[] fields = line.split("\\s+");
-					String hits = fields[2].replace("\"", "");
-					System.out.println("Number of hits: "+hits);
+					hits = fields[2].replace("\"", "");
+					hits = hits.replace(",", "");
+					pBar.setMessage("RADS: Search complete ["+hits+" hits]");
 				}
 				if (line.contains("xdom_url")) {
 					String[] fields = line.split("\\s+");
-					String xdomfile = fields[2].replace("\"", "");
-					System.out.println("Results file present under: "+xdomfile);
+					String xdomURL = fields[2].replace("\"", "");
+					xdomURL = xdomURL.replace(",", "");
+					//System.err.println("THIS IS HITS: >"+hits+"<");
+					//Thread.sleep(100000);
+					Parser parser = new Parser(xdomURL, pBar);
+					parser.parse(Integer.valueOf(hits));
+					pBar.setMessage("Run complete.");
+					//pBar.finish();
 					System.exit(0);
 				}
 			}
@@ -130,11 +131,6 @@ public class RADSRunner {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-	}
-	
-	
-	private void updateBar() {
 		
 	}
 	
