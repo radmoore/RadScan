@@ -9,8 +9,8 @@ public class ProgressBar {
 
 	public static int INTERMEDIATE_MODE = 0;
 	public static int PROGRESSABLE_MODE = 1;
-	public static char SIGN_1 = '=';
-	public static char SIGN_2 = '|';
+	public static char SIGN_1 = '|';
+	public static char SIGN_2 = '=';
 	public static char SIGN_3 = '\\';
 	public static char SIGN_4 = '#';
 

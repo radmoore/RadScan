@@ -35,7 +35,6 @@ public class RADSRunner {
 		pBar = new ProgressBar(500, "Establishing RADS connection", ProgressBar.INTERMEDIATE_MODE);
 		
 		try {
-			//pBar.setIndicatorCharater(ProgressBar.SIGN_2);
 			pBar.start();
 			
 			reader = read( this.query.getQueryString() );
@@ -114,12 +113,9 @@ public class RADSRunner {
 					String[] fields = line.split("\\s+");
 					String xdomURL = fields[2].replace("\"", "");
 					xdomURL = xdomURL.replace(",", "");
-					//System.err.println("THIS IS HITS: >"+hits+"<");
-					//Thread.sleep(100000);
 					Parser parser = new Parser(xdomURL, pBar);
 					parser.parse(Integer.valueOf(hits));
 					pBar.setMessage("Run complete.");
-					//pBar.finish();
 					System.exit(0);
 				}
 			}

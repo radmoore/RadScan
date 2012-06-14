@@ -1,5 +1,7 @@
 package info.radm.radscan;
 
+import info.radm.radscan.utils.RadsMessenger;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -9,12 +11,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class QueryBuilder implements RADSQuery{
 
 	private String queryString = null, queryID = null, querySequence = null;
 	private int format = -1;
 	private File queryFile;
+	private boolean verbose = false, quiet = false;
+	private long seqChecksum;
 	
 	
 	/**
@@ -25,6 +32,44 @@ public class QueryBuilder implements RADSQuery{
 		this.queryFile = new File(queryFilePath);
 		setFormat();
 	}
+	
+	/**
+	 * 
+	 * 
+	 */
+	public QueryBuilder() {	}
+	
+	
+	/**
+	 * 
+	 */
+	public void setQueryProtein(String queryFilePath) {
+		try {
+			this.queryFile = new File(queryFilePath);
+			setFormat();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param verbose
+	 */
+	public void setVerboseMode(boolean verbose) {
+		this.verbose = verbose;
+	}
+	
+	/**
+	 * 
+	 * @param quiet
+	 */
+	public void setQuietMode(boolean quiet) {
+		this.quiet = quiet;
+		this.verbose = false;
+	}
+	
 	
 	/**
 	 * 
@@ -39,7 +84,6 @@ public class QueryBuilder implements RADSQuery{
 				"&gp_rampage_e=0&query=" + URLEncoder.encode(queryString, "utf8") +
 				"&db=simap26&Submit.x=28&Submit.y=28&json=1&.cgifields=algorithm");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.queryString = qString.toString();
@@ -98,6 +142,14 @@ public class QueryBuilder implements RADSQuery{
 	private void setFormat() {
 		
 		StringBuilder qString = new StringBuilder();
+		StringBuilder querySeq = new StringBuilder();
+		
+		if (verbose) {
+			RadsMessenger.writeMessage("RADS");
+			RadsMessenger.writeMessage("Rapid Alignment Domain Search - find proteins with similar architectures");
+			RadsMessenger.printHR();
+			
+		}
 		
 		try {
 			
@@ -111,30 +163,46 @@ public class QueryBuilder implements RADSQuery{
 				if (line.substring(0, 1).equals(">")) {
 					fields = line.split("\\s+");
 					queryID = fields[0].replace(">", "");
+					if (verbose) {
+						RadsMessenger.writeTable("INPUT FILE", queryFile.getName());
+						RadsMessenger.writeTable("QUERY PROTEIN", queryID);
+					}
 					qString.append(line+"\n");
 					continue;
 				}
 				
 				if (this.format == -1) {
 					fields = line.split("\\s+");
+					
 					if (fields.length == 1) {
 						this.format = RADSQuery.FASTA;
+						if (verbose)
+							RadsMessenger.writeTable("FORMAT", "FASTA");
 					}
-					else 
+					else {
 						this.format = RADSQuery.XDOM;
+						if (verbose)
+							RadsMessenger.writeTable("FORMAT", "XDOM");
+					}
 				}
 				qString.append(line+"\n");
+				if (this.format == RADSQuery.FASTA) 
+					querySeq.append(line);
 				
 			}
 			br.close();
 			dis.close();
 			fis.close();
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			
+			if (isFasta()) {
+				generateSequenceChecksum(querySeq.toString());
+				RadsMessenger.writeTable("SEQUENCE CHECKSUM", ""+this.seqChecksum);
+			}
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		
@@ -145,7 +213,18 @@ public class QueryBuilder implements RADSQuery{
 		return this.queryID;
 	}
 	
-
+	
+	private void generateSequenceChecksum(String sequence) {
+		try {
+			Checksum checksum = new CRC32();
+			byte[] msgByte = sequence.getBytes("UTF-8");
+			checksum.update(msgByte,0,msgByte.length);
+			this.seqChecksum = checksum.getValue();
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 	
