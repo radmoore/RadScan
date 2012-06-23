@@ -1,6 +1,6 @@
 RadScan
 =======
-RadScan is a command line utility which provides access to the RADS/RAMPAGE system running on under 
+RadScan is a command line utility written in Java which provides access to the RADS/RAMPAGE system running on under 
 
 http://rads.uni-muenster.de
 
