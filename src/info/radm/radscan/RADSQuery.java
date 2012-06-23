@@ -1,5 +1,7 @@
 package info.radm.radscan;
 
+import info.radm.radscan.utils.ProgressBar;
+
 public interface RADSQuery {
 
 	public static int FASTA = 0;
@@ -11,6 +13,13 @@ public interface RADSQuery {
 	
 	public String getQueryID();
 
+	public boolean getQuietMode();
+	
+	public ProgressBar getProgressBar();
+	
+	public String getDatabase();
+	
+	
 	// TODO:
 	// getQueryFile
 	// getSequence ?

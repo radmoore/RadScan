@@ -1,5 +1,8 @@
 package info.radm.radscan.utils;
 
+
+
+
 /**
  * 
  * @author <a href="http://radm.info">Andrew D. Moore</a>
@@ -15,14 +18,16 @@ public class ProgressBar {
 	public static char SIGN_4 = '#';
 
 	private int current, max, seconds, minutes, ETAsec, ETAmin;
-	private long start, lastUpdate, elapsed, ETAtime;
+	private long start, elapsed, ETAtime;
 	private String runningTime, ETAstring = "--:--", message = "";
-	private boolean intermediate = false, indicate = false;
+	private boolean indicate = false, quiet = false, finished = false;
 	private char indChar = SIGN_1;
-	private int mode;
-	private int barWidth = 75;
+	private int mode = 1;
+	private int barWidth = 35;
 	private int indWidth = 5;
-
+	
+	
+	
 	
 	/**
 	 * 
@@ -30,7 +35,7 @@ public class ProgressBar {
 	 * @param message
 	 */
 	public ProgressBar(int max, String message) {
-		this.message = message;
+		setMessage(message);
 		this.max = max;
 	}
 	
@@ -45,12 +50,25 @@ public class ProgressBar {
 		setMessage(message);
 		this.max = max;
 		this.indicate = true;
-		setProgressMode(mode);
+		
+		setProgressMode(mode, false, false);
 	}
 	
+	/**
+	 * 
+	 * @param max
+	 */
 	public void setMaxVal(int max) {
 		this.max = max;
 	}
+	
+	/**
+	 * 
+	 */
+	public void setQuietMode(boolean quiet) {
+		this.quiet = quiet;
+	}
+	
 	
 	/**
 	 * 
@@ -60,21 +78,38 @@ public class ProgressBar {
 		this.indChar = indicatorChar;
 	}
 	
+	
 	/**
 	 * 
 	 * @param mode
+	 * @param reset
+	 * @param finish
 	 */
-	public void setProgressMode(int mode) {
-		if (mode == PROGRESSABLE_MODE) { 
+	public void setProgressMode(int mode, boolean resetTime, boolean finish) {
+
+		if (mode == PROGRESSABLE_MODE) {
+			if (this.mode == INTERMEDIATE_MODE) {	
+				indicate = false;
+				if ((!quiet) && (finish))
+					finishIntermediate(true);
+			}
 			this.mode = mode;
-			indicate = false;
+			reset();
 		}
-		else if (mode == INTERMEDIATE_MODE)
+		else if (mode == INTERMEDIATE_MODE) {
+			if ((!quiet) && (finish))
+				finishProgress(true);
 			this.mode = mode;
-		
+			reset();
+		}	
 		else
 			new Exception("IllegalProgressMode");
+		
+		if (resetTime)
+			reset();
+		
 	}
+
 	
 	/**
 	 * 
@@ -109,30 +144,76 @@ public class ProgressBar {
 	 */
 	public void setVal(int val) {
 	  this.current = val;
-      this.printProgressBar();
+	  if (!quiet)
+		  this.printProgressBar();
+	}
+	
+	
+	public void finish(boolean newLine) {
+		finished = true;
+		if (mode == INTERMEDIATE_MODE)
+			finishIntermediate(newLine);
+		else
+			finishProgress(newLine);
+		
+		reset();
+	}		
+	
+	
+	private void reset() {
+		current = 0;
+	    elapsed = 0;
+	    seconds = 0;
+	    minutes = 0;
+    	ETAtime = 0;
+    	ETAsec = 0;
+    	ETAmin = 0;
+    	ETAstring = "--:--";
+    	runningTime = "";
+	}
+	
+	
+	/**
+	 * 
+	 * @param newLine
+	 */
+	private void finishProgress(boolean newLine) {
+	    this.current = this.max;
+	    takeTime();
+		if (!quiet) {
+		    StringBuilder finalBar = new StringBuilder();
+		    finalBar.append("|");
+		    for (int i= 0; i < barWidth; i++)
+		    	finalBar.append(indChar);
+		    finalBar.append("|");
+//		    finalBar.append(" 100% [Total: "+runningTime+"]     ");
+		    finalBar.append(" 100%   ");
+		    System.err.print(message+": "+finalBar);
+		    if (newLine)
+		       	System.err.println("");
+		}
 	}
 	
 	/**
 	 * 
+	 * @param newLine
 	 */
-	public void finish() {
-		if (intermediate) {
-			indicate = false;
-			return;
+	private void finishIntermediate(boolean newLine) {
+		indicate = false;
+		takeTime();
+		//this.start = System.currentTimeMillis();
+		if (!quiet) {
+		    StringBuilder finalBar = new StringBuilder();
+		    finalBar.append("|");
+		    for (int i= 0; i < barWidth; i++)
+		    	finalBar.append(indChar);
+		    finalBar.append("|");
+	    	finalBar.append(" ["+runningTime+"]     ");
+		    System.err.print("\r"+message+": "+finalBar);
+		    if (newLine)
+		    	System.err.println("");
 		}
-	    this.current = this.max;
-	    takeTime();
-	    StringBuilder finalBar = new StringBuilder();
-	    finalBar.append("|");
-	    for (int i= 0; i < barWidth; i++)
-	    	finalBar.append(indChar);
-	    finalBar.append("|");
-	    if (mode == PROGRESSABLE_MODE) {
-	    	finalBar.append(" 100% [Total: "+runningTime+"]     ");
-	    	System.out.println(message+": "+finalBar);
-	    }
 	}
-	
 	
 	/**
 	 * 
@@ -169,8 +250,8 @@ public class ProgressBar {
 				 iPbar.append(" ");
 			}
 
-			System.out.print(message+": |"+iPbar+"| ["+runningTime+"]");
-			System.out.print("\r");
+			System.err.print(message+": |"+iPbar+"| ["+runningTime+"]");
+			System.err.print("\r");
 			iPbar = new StringBuilder();
 			pos += 1;
 			try {
@@ -189,7 +270,7 @@ public class ProgressBar {
 	 */
 	private void printProgressBar() {
 	    
-		double numbar = Math.floor(75*(double)current/(double)max);
+		double numbar = Math.floor(barWidth*(double)current/(double)max);
 		double progress = Math.floor(100*((double)current/(double)max));
 	    StringBuilder strbar = new StringBuilder();
 	    int i = 0;
@@ -197,12 +278,12 @@ public class ProgressBar {
 	    for(i = 0; i < numbar; i++)
 	    	strbar.append(indChar);
 	    
-	    for(i = (int)numbar; i < 75; i++)
+	    for(i = (int)numbar; i < barWidth; i++)
 	    	strbar.append(" ");
 	    
 	    takeTime(); 
-	    System.out.print(message+": |"+strbar+"| "+(int)progress+"% complete     "); 
-		System.out.print("\r");
+	    System.err.print(message+": |"+strbar+"| "+(int)progress+"%          "); 
+		System.err.print("\r");
 	}
 
 	/**
@@ -228,9 +309,11 @@ public class ProgressBar {
 			public void run() {
 				try {
 					if (mode == INTERMEDIATE_MODE)
-						printInterBar();
+						if (!quiet)
+							printInterBar();
 					else
-						printProgressBar();
+						if (!quiet)
+							printProgressBar();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
