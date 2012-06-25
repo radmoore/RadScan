@@ -203,7 +203,7 @@ public class RadScan {
 	 * @param cl
 	 * @param qBuilder
 	 */
-	private static void setRampageOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException  {
+	private static void setRampageOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException {
 		
 		/**
 		 * rampage_G
@@ -216,14 +216,22 @@ public class RadScan {
 				int I = Integer.valueOf(cl.getOptionValue("rampage_G"));
 				qBuilder.setRampage_I(I);
 			}
+			if (cl.hasOption("rampage_g")) {
+				int i = Integer.valueOf(cl.getOptionValue("rampage_g"));
+				qBuilder.setRampage_i(i);
+			}
+			if (cl.hasOption("rampage_E")) {
+				int E = Integer.valueOf(cl.getOptionValue("rampage_E"));
+				qBuilder.setRampage_E(E);
+			}
+			if (cl.hasOption("rampage_e")) {
+				int e = Integer.valueOf(cl.getOptionValue("rampage_e"));
+				qBuilder.setRampage_e(e);
+			}
 		}
 		catch (NumberFormatException nfe) {
-			throw new MissingOptionException("Error: Value not a valid integer");
+			throw new MissingOptionException("Error: RAMPAGE gap penalty not a valid integer");
 		}
-			
-		
-//		System.err.println("Setting RAMPAGE options.");
-//		System.exit(0);
 	}
 
 	/**
@@ -231,9 +239,13 @@ public class RadScan {
 	 * @param cl
 	 * @param qBuilder
 	 */
-	private static void setRadsOptions(CommandLine cl, QueryBuilder qBuilder) {
-		System.err.println("Setting RADS options.");
-		System.exit(0);
+	private static void setRadsOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException{
+		try {
+			
+		}
+		catch (NullPointerException nfe) {
+			throw new MissingOptionException("Error: RADS gap penalty not a valid integer");
+		}
 	}
 	
 	
