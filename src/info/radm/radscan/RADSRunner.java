@@ -17,7 +17,8 @@ import java.net.URL;
 public class RADSRunner{
 
 	RADSQuery query;
-	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
+	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/";
+	public static String RADSQueryUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
 	private static int INTERVAL = 5000;
 	private boolean running = false;
 	private ProgressBar pBar;
@@ -79,6 +80,7 @@ public class RADSRunner{
 					String[] fields = line.split("\\s+");
 					jobId = fields[2].replace("\"", "");
 					jobId = jobId.replace(",", "");
+					results.setJobID(jobId);
 				}
 				if (line.contains("full_url")) {
 					String[] fields = line.split("\\s+");

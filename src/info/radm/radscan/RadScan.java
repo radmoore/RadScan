@@ -356,7 +356,7 @@ public class RadScan {
 	            .withDescription("Limit maximum number of results (top x)")
 	            .hasArg()
 	            .withLongOpt("maxHits")
-	            .create("m");
+	            .create("max");
 		
 		@SuppressWarnings("static-access")
 		Option onlyIDs = OptionBuilder

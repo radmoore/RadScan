@@ -10,7 +10,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyStore.Entry;
 import java.util.ArrayList;
+import java.util.TreeMap;
+
+import javax.swing.Scrollable;
 
 /**
  * 
@@ -20,23 +24,25 @@ import java.util.ArrayList;
 
 public class Parser {
 	
-	private String xdomURL;
 	private ProgressBar pbar;
 	private RADSQuery query;
 	private int maxHits = -1;
 	private boolean IDonly = false;
 	private ArrayList<Protein> proteins = null;
-		
+	private RADSResults results;
+	private TreeMap<String, Integer> scoreTable;
+	
 	
 	/**
 	 * 
 	 * @param results
 	 */
 	public Parser(RADSResults results) {
-		this.xdomURL = results.getXdomUrl();
+		this.results = results;
 		this.query = results.getQuery();
 		this.pbar = query.getProgressBar();
-		this.maxHits = results.getHitsNumber(); 
+		this.maxHits = results.getHitsNumber();
+		buildScoreTable();
 	}
 	
 	
@@ -60,6 +66,52 @@ public class Parser {
 	
 	/**
 	 * 
+	 */
+	private void buildScoreTable() {
+		
+		BufferedReader reader = null;
+		String line = null;
+		StringBuilder scoreLine = new StringBuilder();
+		int score = 0;
+		scoreTable = new TreeMap<String, Integer>();
+		try {
+			reader = read(results.getCrampageOut());	
+			while ( (line = reader.readLine()) != null) {
+				if (line.contains("QUERY")) {
+					if (scoreLine.length() != 0)
+						scoreTable.put(scoreLine.toString(), score);
+						//RadsMessenger.writeMessage(scoreLine.toString());
+					
+					scoreLine = new StringBuilder();
+					String[] fields = line.split("\\s+");
+					scoreLine.append(fields[1]);
+					scoreLine.append("\t");
+				}
+				else if (line.contains("SUBJECT")) {
+					String[] fields = line.split("\\s+");
+					scoreLine.append(fields[1]);
+					scoreLine.append("\t");
+				}
+				else if (line.contains("RADS SCORE")) {
+					String[] fields = line.split("\\s+");
+					score = Integer.valueOf(fields[2]);
+				}
+			}
+		}
+		catch (IOException ioe) {
+			
+		}
+		
+		for (String ids: scoreTable.keySet())
+			System.out.println(ids+"\t"+scoreTable.get(ids));
+			
+		System.exit(0);
+	}
+	
+	
+	
+	/**
+	 * 
 	 * @param writer
 	 */
 	public void parse(RadsWriter writer) {
@@ -73,7 +125,7 @@ public class Parser {
 		int val = 0;
 		
 		try {
-			reader = read(xdomURL);
+			reader = read(results.getXdomUrl());
 			String line = null;	
 			while ( (line = reader.readLine()) != null) {
 				
@@ -135,7 +187,7 @@ public class Parser {
 		Protein p = null;
 		
 		try {
-			reader = read(xdomURL);
+			reader = read(results.getXdomUrl());
 			String line = null;
 			
 			while ( (line = reader.readLine()) != null) {

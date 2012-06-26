@@ -7,7 +7,7 @@ package info.radm.radscan;
  */
 public class RADSResults {
 
-	private String xdomURL, jobURL, jobID, runtime;
+	private String xdomURL, crampageOut, jobURL, jobID, runtime;
 	private int hits = 0;
 	private RADSQuery query;
 	
@@ -49,6 +49,24 @@ public class RADSResults {
 	
 	/**
 	 * 
+	 * @param url
+	 */
+	public void setCrampageOut(String url) {
+		this.crampageOut = url;
+	}
+	
+	
+	/**
+	 * 
+	 * @param jobID
+	 */
+	public void setJobID(String jobID) {
+		this.jobID = jobID;
+	}
+	
+	
+	/**
+	 * 
 	 */
 	public RADSQuery getQuery() {
 		return this.query;
@@ -79,6 +97,20 @@ public class RADSResults {
 	 */
 	public String getXdomUrl() {
 		return this.xdomURL;
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getJobUrl() {
+		return this.jobID;
+	}
+	
+	
+	public String getCrampageOut() {
+		return RADSRunner.RADSBaseUrl+"/output/"+jobID+".crampage.out";
 	}
 	
 	

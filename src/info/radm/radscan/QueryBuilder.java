@@ -104,6 +104,7 @@ public class QueryBuilder implements RADSQuery{
 	}
 	
 	
+	
 	public boolean isBenchmarking() {
 		return this.benchmarkMode;
 	}
@@ -285,7 +286,7 @@ public class QueryBuilder implements RADSQuery{
 	// TODO: use StringBuilder more efficiently
 	public RADSQuery build() {
 		StringBuilder qString = new StringBuilder();
-		qString.append(RADSRunner.RADSBaseUrl);
+		qString.append(RADSRunner.RADSQueryUrl);
 		String urlAlgo = "algorithm=rads";
 		if (algo.equals("rampage"))
 			urlAlgo = "algorithm=rads&algorithm=rampage";
