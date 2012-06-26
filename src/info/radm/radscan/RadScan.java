@@ -51,6 +51,9 @@ public class RadScan {
             // set database
 //            if (cl.hasOption("d"))
 //            	setDatabase(cl, qBuilder);
+<<<<<<< HEAD
+>>>>>>> 92bc832... * Removed database cmd line switch
+=======
 >>>>>>> 92bc832... * Removed database cmd line switch
             	            
             // set inputfile
@@ -389,7 +392,11 @@ public class RadScan {
 		opt.addOption(maxNumResults);
 		opt.addOption(onlyIDs);
 <<<<<<< HEAD
+<<<<<<< HEAD
 		//opt.addOption(database);
+=======
+//		opt.addOption(database);
+>>>>>>> 92bc832... * Removed database cmd line switch
 =======
 //		opt.addOption(database);
 >>>>>>> 92bc832... * Removed database cmd line switch
