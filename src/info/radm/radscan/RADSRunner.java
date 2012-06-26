@@ -130,6 +130,7 @@ public class RADSRunner{
 	
 		BufferedReader reader = null;
 		String rawRunTime;
+		boolean has_error = false;
 
 		if (!quiet)
 			pBar.setMessage("RADS: search running");
@@ -146,6 +147,17 @@ public class RADSRunner{
 					intervalCheck(jobURL, results);
 					break;
 				}
+				
+		        if (line.contains("error"))
+		            has_error = true;
+		      
+		          if (line.contains("message") && has_error) {
+		            String[] fields = line.split(": ");
+		            String msg = fields[1].replace("\"", "");
+		            pBar.finish(true);
+		            System.err.println("ERROR: "+msg);
+		            System.exit(-1);
+		          }
 				
 				if (line.contains("runtime")) {
 					String[] fields = line.split("\\s+");
