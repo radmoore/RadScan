@@ -44,6 +44,8 @@ public class RADSRunner{
 		String xdomURL = null; 
 		BufferedReader reader = null;
 		RADSResults results = new RADSResults(query);
+		boolean has_error = false;
+		
 		if (!quiet)
 			pBar.setMessage("Establishing RADS connection");
 		
@@ -58,6 +60,19 @@ public class RADSRunner{
 			while (line != null) {
 				
 				line = reader.readLine();
+				
+		        if (line.contains("error"))
+		            has_error = true;
+		      
+		          if (line.contains("message") && has_error) {
+		            String[] fields = line.split(": ");
+		            String msg = fields[1].replace("\"", "");
+		            pBar.finish(true);
+		            System.err.println("ERROR: "+msg);
+		            System.exit(-1);
+		          }
+				
+				
 				if (line.contains("preparing")) {
 					if (!quiet)
 						pBar.setMessage("RADS: submitting job");
