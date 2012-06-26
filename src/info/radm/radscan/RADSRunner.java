@@ -17,8 +17,6 @@ import java.net.URL;
 public class RADSRunner{
 
 	RADSQuery query;
-	//public static String RADSBaseUrl = "http://localhost/rads3.pl?";
-	//public static String RADSBaseUrl = "http://ebbam.uni-muenster.de/rads3.pl?";
 	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
 	private static int INTERVAL = 5000;
 	private boolean running = false;
@@ -64,15 +62,14 @@ public class RADSRunner{
 		        if (line.contains("error"))
 		            has_error = true;
 		      
-		          if (line.contains("message") && has_error) {
-		            String[] fields = line.split(": ");
+		        if (line.contains("message") && has_error) {
+		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
 		            System.err.println("ERROR: "+msg);
 		            System.exit(-1);
-		          }
-				
-				
+		        }
+
 				if (line.contains("preparing")) {
 					if (!quiet)
 						pBar.setMessage("RADS: submitting job");
@@ -151,13 +148,13 @@ public class RADSRunner{
 		        if (line.contains("error"))
 		            has_error = true;
 		      
-		          if (line.contains("message") && has_error) {
-		            String[] fields = line.split(": ");
+		        if (line.contains("message") && has_error) {
+		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
 		            System.err.println("ERROR: "+msg);
 		            System.exit(-1);
-		          }
+		        }
 				
 				if (line.contains("runtime")) {
 					String[] fields = line.split("\\s+");
