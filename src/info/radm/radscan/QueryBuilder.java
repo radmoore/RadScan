@@ -71,7 +71,15 @@ public class QueryBuilder implements RADSQuery{
 		this.algo = algo;
 	}
 	
+	
+	/**
+	 * 
+	 */
+	public void setMatrix(String maxtrix) {
+		this.matrix = maxtrix;
+	}
 
+	
 	/**
 	 * 
 	 * @param database
@@ -113,6 +121,12 @@ public class QueryBuilder implements RADSQuery{
 	public String getFileName() {
 		return queryFile.getName();
 	}
+	
+	
+	public String getMatrix() {
+		return this.matrix;
+	}
+	
 	
 	/**
 	 * 

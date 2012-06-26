@@ -207,6 +207,10 @@ public class RadScan {
 	 */
 	private static void setRampageOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException {
 		try {
+			
+    		if (cl.hasOption("m"))
+    			qBuilder.setMatrix(cl.getOptionValue("m"));
+			
 			if (cl.hasOption("rampage_G")) {
 				int I = Integer.valueOf(cl.getOptionValue("rampage_G"));
 				qBuilder.setRampage_I(I);
@@ -270,6 +274,9 @@ public class RadScan {
 		RadsMessenger.writeTable("QUERY PROTEIN", qBuilder.getQueryID());
 		RadsMessenger.writeTable("DATABASE", qBuilder.getDatabase());
 		RadsMessenger.writeTable("ALGORITHM", qBuilder.getAlgorithm());
+		if (qBuilder.getAlgorithm().equals("RAMPAGE")) {
+			RadsMessenger.writeTable("MATRIX", qBuilder.getMatrix());	
+		}
 		if (qBuilder.isFasta()) {
 			RadsMessenger.writeTable("FORMAT", "FASTA");
 			RadsMessenger.writeTable("SEQUENCE CHECKSUM", ""+qBuilder.getSeqChecksum());
@@ -390,6 +397,15 @@ public class RadScan {
 	            .withLongOpt("architectures")
 	            .create("arch");
 		
+		@SuppressWarnings("static-access")
+		Option matrix = OptionBuilder.withArgName("substitution matrix")
+	            .hasArg()
+	            .withDescription("Amino acid substitution matrix (used in RAMPAGE mode) " +
+	            		"[Default BLOSSUM62]. See ftp://ftp.ncbi.nih.gov/blast/matrices/" +
+	            		"for a list of supported matrices")
+	            .withLongOpt("matrix")
+	            .create("m");
+		
 		opt.addOption(algo);
 		opt.addOption(queryProt);
 		opt.addOption(resultFile);
@@ -398,6 +414,7 @@ public class RadScan {
 		//opt.addOption(database);
 		opt.addOption(quiet);
 		opt.addOption(arch);
+		opt.addOption(matrix);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");
 		
 		// RADS and RAMPAGE options
