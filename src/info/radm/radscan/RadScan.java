@@ -58,8 +58,10 @@ public class RadScan {
             	setAlgorithm(cl, qBuilder);
             	if (qBuilder.getAlgorithm().equals("RAMPAGE"))
             		setRampageOptions(cl, qBuilder);
+            	else
+            		setRadsOptions(cl, qBuilder);
             }
-       
+    
             // setup writer
             RadsWriter writer = null;
             if (cl.hasOption("o")) {			
@@ -204,13 +206,6 @@ public class RadScan {
 	 * @param qBuilder
 	 */
 	private static void setRampageOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException {
-		
-		/**
-		 * rampage_G
-		 * rampage_g
-		 * rampage_T
-		 * rampage_t
-		 */
 		try {
 			if (cl.hasOption("rampage_G")) {
 				int I = Integer.valueOf(cl.getOptionValue("rampage_G"));
@@ -241,7 +236,22 @@ public class RadScan {
 	 */
 	private static void setRadsOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException{
 		try {
-			
+			if (cl.hasOption("rads_G")) {
+				int G = Integer.valueOf(cl.getOptionValue("rampage_G"));
+				qBuilder.setRads_G(G);
+			}
+			if (cl.hasOption("rads_g")) {
+				int g = Integer.valueOf(cl.getOptionValue("rampage_g"));
+				qBuilder.setRads_g(g);
+			}
+			if (cl.hasOption("rads_T")) {
+				int T = Integer.valueOf(cl.getOptionValue("rampage_T"));
+				qBuilder.setRads_T(T);
+			}
+			if (cl.hasOption("rads_t")) {
+				int t = Integer.valueOf(cl.getOptionValue("rampage_t"));
+				qBuilder.setRads_t(t);
+			}
 		}
 		catch (NullPointerException nfe) {
 			throw new MissingOptionException("Error: RADS gap penalty not a valid integer");

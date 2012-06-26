@@ -6,6 +6,7 @@ public interface RADSQuery {
 
 	public static int FASTA = 0;
 	public static int XDOM = 1;
+	public static int RAWSEQ = 2;
 	
 	public RADSQuery build();
 	

@@ -17,7 +17,7 @@ import java.security.MessageDigest;
 
 public class QueryBuilder implements RADSQuery{
 
-	private String queryString = null, queryID = null, querySequence = null;
+	private String queryString = null, queryID = "rawseq", querySequence = null;
 	private int format = -1;
 	private File queryFile;
 	private boolean quiet = false;
@@ -341,7 +341,9 @@ public class QueryBuilder implements RADSQuery{
 				if (this.format == -1) {
 					fields = line.split("\\s+");
 					
-					if (fields.length == 1)
+					if (fields.length == 0)
+						this.format = RADSQuery.RAWSEQ;
+					else if (fields.length == 1)
 						this.format = RADSQuery.FASTA;
 					else 
 						this.format = RADSQuery.XDOM;
