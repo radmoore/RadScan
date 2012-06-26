@@ -28,7 +28,7 @@ public class RADSRunner{
 	
 	public RADSRunner(RADSQuery query) {
 		this.query = query;
-		this.quiet = query.getQuietMode();
+		this.quiet = query.isQuiet();
 		this.pBar = query.getProgressBar();
 		pBar.setQuietMode(quiet);
 	}
@@ -143,6 +143,14 @@ public class RADSRunner{
 					reader.close();
 					intervalCheck(jobURL, results);
 					break;
+				}
+				
+				if (line.contains("runtime") && query.isBenchmarking()) {
+					String[] fields = line.split(": ");
+		            String runtime = fields[1].replace("\"", "");
+		            runtime = runtime.replace(",", "");
+					System.out.println("Runtime: "+runtime+"s");
+					System.exit(0);
 				}
 				
 		        if (line.contains("error"))

@@ -45,11 +45,14 @@ public class RadScan {
             // set to quiet mode
             if (cl.hasOption("q"))
             	qBuilder.setQuietMode(true);
+
+
+			if (cl.hasOption("runtime")) {
+				qBuilder.setQuietMode(true);
+				qBuilder.setBenchmarkMode(true);
+			}
+
             
-            // set database
-//            if (cl.hasOption("d"))
-//            	setDatabase(cl, qBuilder);
-            	            
             // set inputfile
             qBuilder.setQueryProtein(cl.getOptionValue("i"));
 
@@ -77,8 +80,7 @@ public class RadScan {
             else 
             	writer = new RadsWriter();
             
-            // add writer to list of used writers for
-            // later reporting
+            // add writer to list of used writers for later reporting
             writers.add(writer);
             
             // print some information
@@ -87,7 +89,6 @@ public class RadScan {
             
 			RADSQuery rQuery = qBuilder.build();
 			RADSRunner rads = new RADSRunner(rQuery);
-			// SUBMIT //
 			RADSResults results = rads.submit();
 						
 			// Initiate parser
@@ -101,9 +102,10 @@ public class RadScan {
 			
 			if (cl.hasOption("I"))
 				resultParser.setIDonlyMode(true);
-
+				
+			
 			// no post-processing needed
-			if (!cl.hasOption("a")) {
+			if (!cl.hasOption("arch")) {
 				resultParser.parse(writer);
 			}
 			else {
@@ -121,8 +123,6 @@ public class RadScan {
 				}
 				// create and write architecture freq file 
 				constructArchitectureFreq(proteins, cl, writers);
-				
-		
 			}
 			// inform of all outputfiles created (if any)
 			for (RadsWriter rw : writers) {
@@ -135,8 +135,10 @@ public class RadScan {
 			}
 			
 			// RUN COMPLETE //
-			RadsMessenger.writeMessage("Scan complete.");
-			RadsMessenger.printHR();
+			if (!qBuilder.isQuiet()) {
+				RadsMessenger.writeMessage("Scan complete.");
+				RadsMessenger.printHR();
+			}
 		}
 		catch (MissingOptionException e) {
 			System.err.println(e.getMessage());

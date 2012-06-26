@@ -14,12 +14,13 @@ public interface RADSQuery {
 	
 	public String getQueryID();
 
-	public boolean getQuietMode();
+	public boolean isQuiet();
 	
 	public ProgressBar getProgressBar();
 	
 	public String getDatabase();
 	
+	public boolean isBenchmarking();
 	
 	// TODO:
 	// getQueryFile

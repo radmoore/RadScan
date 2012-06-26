@@ -20,7 +20,7 @@ public class QueryBuilder implements RADSQuery{
 	private String queryString = null, queryID = "rawseq", querySequence = null;
 	private int format = -1;
 	private File queryFile;
-	private boolean quiet = false;
+	private boolean quiet = false, benchmarkMode = false;
 	private String seqChecksum;
 	private ProgressBar pBar;
 	private String database = "uniprot", algo = "rads", matrix = "BLOSUM62";
@@ -63,6 +63,12 @@ public class QueryBuilder implements RADSQuery{
 	}
 
 	
+	
+	public void setBenchmarkMode(boolean mode) {
+		this.benchmarkMode = mode;
+	}
+	
+	
 	/**
 	 * 
 	 * @param algo
@@ -95,6 +101,11 @@ public class QueryBuilder implements RADSQuery{
 	 */
 	public boolean isQuiet() {
 		return this.quiet;
+	}
+	
+	
+	public boolean isBenchmarking() {
+		return this.benchmarkMode;
 	}
 	
 	
