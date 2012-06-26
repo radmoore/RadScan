@@ -45,10 +45,6 @@ public class RadScan {
             // set to quiet mode
             if (cl.hasOption("q"))
             	qBuilder.setQuietMode(true);
-            
-            // set database
-            if (cl.hasOption("d"))
-            	setDatabase(cl, qBuilder);
             	            
             // set inputfile
             qBuilder.setQueryProtein(cl.getOptionValue("i"));
@@ -385,7 +381,7 @@ public class RadScan {
 		opt.addOption(resultFile);
 		opt.addOption(maxNumResults);
 		opt.addOption(onlyIDs);
-		opt.addOption(database);
+		//opt.addOption(database);
 		opt.addOption(quiet);
 		opt.addOption(arch);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");

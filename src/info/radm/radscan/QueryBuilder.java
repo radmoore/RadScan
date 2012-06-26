@@ -23,7 +23,7 @@ public class QueryBuilder implements RADSQuery{
 	private boolean quiet = false;
 	private String seqChecksum;
 	private ProgressBar pBar;
-	private String database = "swisspfam", algo = "rads", matrix = "BLOSUM62";
+	private String database = "uniprot", algo = "rads", matrix = "BLOSUM62";
 	
 	private int gp_rampage_M = 150, gp_rampage_m= -100,
 			gp_rampage_G =-50, gp_rampage_g = -25, gp_rampage_T= -100,
