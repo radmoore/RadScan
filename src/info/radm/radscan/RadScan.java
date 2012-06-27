@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import javax.xml.ws.handler.MessageContext.Scope;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
@@ -64,7 +66,7 @@ public class RadScan {
             	else
             		setRadsOptions(cl, qBuilder);
             }
-    
+            
             // setup writer
             RadsWriter writer = null;
             if (cl.hasOption("o")) {			
@@ -102,7 +104,17 @@ public class RadScan {
 			
 			if (cl.hasOption("I"))
 				resultParser.setIDonlyMode(true);
-				
+			
+			// write score table
+			try {
+				RadsWriter scoreWriter = new RadsWriter("run-score.tbl", "Score table of hits");
+				for (Entry<String, Integer> e : resultParser.getScoreTable())
+					scoreWriter.writeln(e.getKey()+"\t"+e.getValue());
+				writers.add(scoreWriter);
+			} 
+			catch (IOException ioe) {
+				System.err.println("ERROR: could not write score table to run-score.tbl");
+			}
 			
 			// no post-processing needed
 			if (!cl.hasOption("arch")) {
@@ -124,8 +136,10 @@ public class RadScan {
 				// create and write architecture freq file 
 				constructArchitectureFreq(proteins, cl, writers);
 			}
+			
 			// inform of all outputfiles created (if any)
 			for (RadsWriter rw : writers) {
+				
 				if (rw.isToFile()) {
 					RadsMessenger.writeMessage(rw.getFileDescription()+
 							" written to " +
@@ -298,7 +312,7 @@ public class RadScan {
 		// now create Architecture Freq table
 		RadsWriter archWriter = null;
 		try {
-			archWriter = new RadsWriter(cl.getOptionValue("a"), "Unique architecture frequencies");
+			archWriter = new RadsWriter(cl.getOptionValue("arch"), "Unique architecture frequencies");
 		} catch (IOException ioe) {
 			System.err.println("ERROR: could not create/write to "+cl.getOptionValue("a"));
 			System.exit(-1);

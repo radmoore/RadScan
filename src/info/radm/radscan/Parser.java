@@ -2,6 +2,7 @@ package info.radm.radscan;
 
 import info.radm.radscan.ds.Domain;
 import info.radm.radscan.ds.Protein;
+import info.radm.radscan.utils.MapUtilities;
 import info.radm.radscan.utils.ProgressBar;
 import info.radm.radscan.utils.RadsWriter;
 
@@ -10,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
-import java.util.TreeMap;
-
-import javax.swing.Scrollable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -30,7 +30,7 @@ public class Parser {
 	private boolean IDonly = false;
 	private ArrayList<Protein> proteins = null;
 	private RADSResults results;
-	private TreeMap<String, Integer> scoreTable;
+	private List<Map.Entry<String, Integer>> scoreTable;
 	
 	
 	/**
@@ -66,6 +66,14 @@ public class Parser {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	public List<Map.Entry<String, Integer>> getScoreTable() {
+		return this.scoreTable;
+	}
+	
+	/**
+	 * 
 	 */
 	private void buildScoreTable() {
 		
@@ -73,13 +81,14 @@ public class Parser {
 		String line = null;
 		StringBuilder scoreLine = new StringBuilder();
 		int score = 0;
-		scoreTable = new TreeMap<String, Integer>();
+		Map<String, Integer> tmpScores = new HashMap<String, Integer>();
+		pbar.setMessage("Constructing score table");
 		try {
 			reader = read(results.getCrampageOut());	
 			while ( (line = reader.readLine()) != null) {
 				if (line.contains("QUERY")) {
 					if (scoreLine.length() != 0)
-						scoreTable.put(scoreLine.toString(), score);
+						tmpScores.put(scoreLine.toString(), score);
 						//RadsMessenger.writeMessage(scoreLine.toString());
 					
 					scoreLine = new StringBuilder();
@@ -101,11 +110,7 @@ public class Parser {
 		catch (IOException ioe) {
 			
 		}
-		
-		for (String ids: scoreTable.keySet())
-			System.out.println(ids+"\t"+scoreTable.get(ids));
-			
-		System.exit(0);
+		scoreTable = MapUtilities.sortByValue(tmpScores);
 	}
 	
 	
