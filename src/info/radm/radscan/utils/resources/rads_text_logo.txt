@@ -4,7 +4,7 @@
      JMMM#. `` ...... ` `.MMMN;
      MMMMMR.+NMMMMMMMNme.dMMMMb
      MMMMMMMMMMMMMMMMMMMMMMMMM@
-     dMMMMMMMMMMMMMMMMMMMMMMMMt`     Rapid Alignment Domain Search
+     dMMMMMMMMMMMMMMMMMMMMMMMMt`   Rapid Alignment of Domain Strings
       TMMMMMMMMMMMMMMMMMMMMMM=  `########     ###    ########   ######
        JMMMMMMMMMMMMMMMMMMMN;    ##     ##   ## ##   ##     ## ##    ##
      `.MMMM"MMMNMMMMMMM#9MMMR.   ##     ##  ##   ##  ##     ## ##

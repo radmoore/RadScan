@@ -65,11 +65,22 @@ public class RADSResults {
 	}
 	
 	
+
 	/**
 	 * 
+	 * @return
 	 */
 	public RADSQuery getQuery() {
 		return this.query;
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getJobID() {
+		return this.jobID;
 	}
 	
 	

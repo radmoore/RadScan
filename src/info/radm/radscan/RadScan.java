@@ -7,11 +7,12 @@ import info.radm.radscan.utils.RadsMessenger;
 import info.radm.radscan.utils.RadsWriter;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.xml.ws.handler.MessageContext.Scope;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -34,12 +35,20 @@ public class RadScan {
 		f.setSyntaxPrefix("Usage: ");
 		
 		ArrayList<RadsWriter> writers = new ArrayList<RadsWriter>();
+		//String datestamp = new SimpleDateFormat("hhmmss-ddmmyy").format(new Date());
 		
 		try {
 			// add options
 			buildOptions(opt);	
             PosixParser parser = new PosixParser();
             CommandLine cl = parser.parse(opt, args, false);
+            
+            if (cl.hasOption("h")) {
+            	f.printHelp("radscan [OPTIONS] -in <query>",
+        	        	"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
+        			System.exit(0);
+            }
+            	
             
             // construct a query
             QueryBuilder qBuilder = new QueryBuilder();
@@ -97,8 +106,8 @@ public class RadScan {
 			Parser resultParser = new Parser(results);
 			int max;
 			
-			if (cl.hasOption("m")) {
-				max = Integer.valueOf(cl.getOptionValue("m"));
+			if (cl.hasOption("max")) {
+				max = Integer.valueOf(cl.getOptionValue("max"));
 				resultParser.setMaxHits(max);
 			}
 			
@@ -106,18 +115,20 @@ public class RadScan {
 				resultParser.setIDonlyMode(true);
 			
 			// write score table
-			try {
-				RadsWriter scoreWriter = new RadsWriter("run-score.tbl", "Score table of hits");
-				for (Entry<String, Integer> e : resultParser.getScoreTable())
-					scoreWriter.writeln(e.getKey()+"\t"+e.getValue());
-				writers.add(scoreWriter);
-			} 
-			catch (IOException ioe) {
-				System.err.println("ERROR: could not write score table to run-score.tbl");
+			if (! rQuery.isQuiet() ) {
+				try {
+					RadsWriter scoreWriter = new RadsWriter(results.getJobID()+"_scores.txt", "Score table of hits");
+					for (Entry<String, Integer> e : resultParser.getScoreTable())
+						scoreWriter.writeln(e.getKey()+"\t"+e.getValue());
+					writers.add(scoreWriter);
+				} 
+				catch (IOException ioe) {
+					System.err.println("ERROR: could not write score table to score");
+				}
 			}
 			
 			// no post-processing needed
-			if (!cl.hasOption("arch")) {
+			if (!cl.hasOption("u")) {
 				resultParser.parse(writer);
 			}
 			else {
@@ -133,6 +144,7 @@ public class RadScan {
 					writer.writeln(p.toString());
 					i++;
 				}
+				
 				// create and write architecture freq file 
 				constructArchitectureFreq(proteins, cl, writers);
 			}
@@ -155,7 +167,7 @@ public class RadScan {
 			}
 		}
 		catch (MissingOptionException e) {
-			System.err.println(e.getMessage());
+			//System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>", 
         		"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
 			System.exit(-1);
@@ -318,21 +330,24 @@ public class RadScan {
 			System.exit(-1);
 		}
 		
-		HashMap<String, MutableInt> archFreq = new HashMap<String, MutableInt>();
+		Map<String, MutableInt> tmpFreq = new HashMap<String, MutableInt>();
 		for (Protein p: proteins) {
-			MutableInt freq = archFreq.get(p.architecture());
+			MutableInt freq = tmpFreq.get(p.architecture());
 			if (freq == null) {
 				MutableInt mint = new MutableInt();
-				archFreq.put(p.architecture(), mint);
+				tmpFreq.put(p.architecture(), mint);
 			}
 			else
 				freq.inc();
 		}
-		ProgressBar pBar = new ProgressBar(archFreq.size(), "Writing unique architectures");
+		
+		//MapUtilities.sortByValue(tmpScores);
+		
+		ProgressBar pBar = new ProgressBar(tmpFreq.size(), "Writing unique architectures");
 		pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, false, true);
 		archWriter.writeln( "# FREQUENCY, ARCHITECTURE");
 		int i = 1;
-		for (Entry<String, MutableInt> e: archFreq.entrySet()) {
+		for (Entry<String, MutableInt> e: tmpFreq.entrySet()) {
 			pBar.setVal(i);
 			MutableInt mint = e.getValue();
 			archWriter.writeln( ""+mint.get()+", "+(String) e.getKey());
@@ -373,9 +388,14 @@ public class RadScan {
 	            .create("max");
 		
 		@SuppressWarnings("static-access")
+		Option help = OptionBuilder
+				.withDescription("Show this help")
+	            .withLongOpt("help")
+	            .create("h");
+		
+		@SuppressWarnings("static-access")
 		Option onlyIDs = OptionBuilder
-	            .withDescription("Only return ID of hits (list). This option takes " +
-	            		"presedence over option s")
+	            .withDescription("Only return ID of hits (list)")
 	            .withLongOpt("ID-only")
 	            .create("I");
 		
@@ -394,10 +414,10 @@ public class RadScan {
 		
 		@SuppressWarnings("static-access")
 		Option quiet = OptionBuilder
-	            .withDescription("Quiet mode - surpress all output except for results")
+	            .withDescription("Quiet mode - surpress all output except for results (incl. score table)")
 	            .withLongOpt("quiet")
 	            .create("q");
-		
+		/**
 		@SuppressWarnings("static-access")
 		Option database = OptionBuilder.withArgName("dbname")
 	            .withDescription("RADS database to scan against " +
@@ -407,17 +427,18 @@ public class RadScan {
 	            .create("d");
 		
 		@SuppressWarnings("static-access")
-		Option arch = OptionBuilder.withArgName("file")
+		Option unique = OptionBuilder.withArgName("file")
 	            .hasArg()
-	            .withDescription("Post-processing: return architecture frequency table.")
-	            .withLongOpt("architectures")
-	            .create("arch");
+	            .withDescription("Return unique architecture frequency table (post-processing)")
+	            .withLongOpt("unique")
+	            .create("u");
+		**/
 		
 		@SuppressWarnings("static-access")
 		Option matrix = OptionBuilder.withArgName("substitution matrix")
 	            .hasArg()
 	            .withDescription("Amino acid substitution matrix (used in RAMPAGE mode) " +
-	            		"[Default BLOSSUM62]. See ftp://ftp.ncbi.nih.gov/blast/matrices/" +
+	            		"[Default BLOSSUM62]. See ftp://ftp.ncbi.nih.gov/blast/matrices/ " +
 	            		"for a list of supported matrices")
 	            .withLongOpt("matrix")
 	            .create("m");
@@ -427,9 +448,10 @@ public class RadScan {
 		opt.addOption(resultFile);
 		opt.addOption(maxNumResults);
 		opt.addOption(onlyIDs);
+		opt.addOption(help);
 		//opt.addOption(database);
 		opt.addOption(quiet);
-		opt.addOption(arch);
+		//opt.addOption(unique);
 		opt.addOption(matrix);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");
 		

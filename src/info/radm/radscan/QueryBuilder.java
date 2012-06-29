@@ -74,7 +74,7 @@ public class QueryBuilder implements RADSQuery{
 	 * @param algo
 	 */
 	public void setAlgorithm(String algo) {
-		this.algo = algo;
+		this.algo = algo.toLowerCase();
 	}
 	
 	
@@ -280,10 +280,11 @@ public class QueryBuilder implements RADSQuery{
 	
 	
 	
+
 	/**
-	 * 
+	 * TODO: use string builder for query string
+	 * construction
 	 */
-	// TODO: use StringBuilder more efficiently
 	public RADSQuery build() {
 		StringBuilder qString = new StringBuilder();
 		qString.append(RADSRunner.RADSQueryUrl);

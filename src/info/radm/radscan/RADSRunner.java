@@ -151,7 +151,7 @@ public class RADSRunner{
 					String[] fields = line.split(": ");
 		            String runtime = fields[1].replace("\"", "");
 		            runtime = runtime.replace(",", "");
-					System.out.println("Runtime: "+runtime+"s");
+					System.err.println(runtime);
 					System.exit(0);
 				}
 				

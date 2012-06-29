@@ -22,9 +22,11 @@ public class MapUtilities {
 	        return entries;
 	}
 	
+	
 	private static class ByValue<K, V extends Comparable<V>> implements Comparator<Entry<K, V>> {
 	        public int compare(Entry<K, V> o1, Entry<K, V> o2) {
 	                return o2.getValue().compareTo(o1.getValue());
 	        }
 	}
+	
 }

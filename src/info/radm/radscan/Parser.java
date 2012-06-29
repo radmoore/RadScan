@@ -72,48 +72,6 @@ public class Parser {
 		return this.scoreTable;
 	}
 	
-	/**
-	 * 
-	 */
-	private void buildScoreTable() {
-		
-		BufferedReader reader = null;
-		String line = null;
-		StringBuilder scoreLine = new StringBuilder();
-		int score = 0;
-		Map<String, Integer> tmpScores = new HashMap<String, Integer>();
-		pbar.setMessage("Constructing score table");
-		try {
-			reader = read(results.getCrampageOut());	
-			while ( (line = reader.readLine()) != null) {
-				if (line.contains("QUERY")) {
-					if (scoreLine.length() != 0)
-						tmpScores.put(scoreLine.toString(), score);
-						//RadsMessenger.writeMessage(scoreLine.toString());
-					
-					scoreLine = new StringBuilder();
-					String[] fields = line.split("\\s+");
-					scoreLine.append(fields[1]);
-					scoreLine.append("\t");
-				}
-				else if (line.contains("SUBJECT")) {
-					String[] fields = line.split("\\s+");
-					scoreLine.append(fields[1]);
-					scoreLine.append("\t");
-				}
-				else if (line.contains("RADS SCORE")) {
-					String[] fields = line.split("\\s+");
-					score = Integer.valueOf(fields[2]);
-				}
-			}
-		}
-		catch (IOException ioe) {
-			
-		}
-		scoreTable = MapUtilities.sortByValue(tmpScores);
-	}
-	
-	
 	
 	/**
 	 * 
@@ -121,7 +79,10 @@ public class Parser {
 	 */
 	public void parse(RadsWriter writer) {
 		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true, true);
-		pbar.setMessage("Writing hits to file");
+		String msg = "Writing hits to file";
+		if (IDonly)
+			msg = "Writing IDs to file"; 
+		pbar.setMessage(msg);
 		pbar.setMaxVal(maxHits);
 		if ( writer.isStdOutMode() )
 			pbar.setQuietMode(true);
@@ -135,8 +96,10 @@ public class Parser {
 			while ( (line = reader.readLine()) != null) {
 				
 				if (line.substring(0, 1).equals(">")) {
-					if ( (maxHits != -1) && (val >= maxHits) )
+					if ( (maxHits != -1) && (val >= maxHits) ) {
+						System.err.println("MAX REACHED: "+val);
 						break;
+					}
 					
 					String[] fields = line.split("\\t");
 					String pid = fields[0].replace(">", "");
@@ -157,6 +120,7 @@ public class Parser {
 			val++;
 			pbar.setVal(val);
 			writer.destroy();
+			pbar.finish(true);
 		}
 		catch(MalformedURLException mue) {
 			mue.printStackTrace();
@@ -164,6 +128,7 @@ public class Parser {
 		catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
+		
 	}
 	
 	
@@ -244,6 +209,47 @@ public class Parser {
 	private BufferedReader read(String url) throws IOException, MalformedURLException{
 		return new BufferedReader(new InputStreamReader(new URL(url).openStream()));}
 	
+	
+	
+	/**
+	 * 
+	 */
+	private void buildScoreTable() {
+		
+		BufferedReader reader = null;
+		String line = null;
+		StringBuilder scoreLine = new StringBuilder();
+		int score = 0;
+		Map<String, Integer> tmpScores = new HashMap<String, Integer>();
+		pbar.setMessage("Constructing score table");
+		try {
+			reader = read(results.getCrampageOut());	
+			while ( (line = reader.readLine()) != null) {
+				if (line.contains("QUERY")) {
+					if (scoreLine.length() != 0)
+						tmpScores.put(scoreLine.toString(), score);
+					
+					scoreLine = new StringBuilder();
+					String[] fields = line.split("\\s+");
+					scoreLine.append(fields[1]);
+					scoreLine.append("\t");
+				}
+				else if (line.contains("SUBJECT")) {
+					String[] fields = line.split("\\s+");
+					scoreLine.append(fields[1]);
+					scoreLine.append("\t");
+				}
+				else if (line.contains("RADS SCORE")) {
+					String[] fields = line.split("\\s+");
+					score = Integer.valueOf(fields[2]);
+				}
+			}
+		}
+		catch (IOException ioe) {
+			
+		}
+		scoreTable = MapUtilities.sortByValue(tmpScores);
+	}
 	
 }
 
