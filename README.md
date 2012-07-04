@@ -45,5 +45,58 @@ The remaining lines specify each domain (in sequence) with its repective co-ordi
 ID or accession number. Optionally, the ID fields can be followed by an Evalue inidcating the 
 significance of the hit between the domain sequence and the defining model.
 
+<pre>
+ $ java -jar radscan.jar -h
+</pre>
+
+```java
+Usage: radscan [OPTIONS] -in <query>
+Rapid Alignment Domain Search - find proteins with similar architectures
+
+ -a,--algorithm <name>               Search algorithm to run. Currently supports RADS or RAMPGAE. [Default: RADS]
+ -h,--help                           Show this help
+ -I,--ID-only                        Only return ID of hits (list)
+ -i,--infile <file>                  Query: protein in XDOM or FASTA format
+ -m,--matrix <substitution matrix>   Amino acid substitution matrix (used in RAMPAGE mode) [Default BLOSSUM62]. See
+                                     ftp://ftp.ncbi.nih.gov/blast/matrices/ for a list of supported matrices
+ -max,--maxHits <int>                Limit maximum number of results (top x)
+ -o,--out <file>                     Outfile for results (xdom)
+ -q,--quiet                          Quiet mode - surpress all output except for results (incl. score table)
+    --rads_g <int>                   RADS gap penalties: Internal extension [-25]
+    --rads_G <int>                   RADS gap penalties: Internal opening [-50]
+    --rads_M <int>                   RADS match score [150]
+    --rads_m <int>                   RADS mismatch penalty [100]
+    --rads_t <int>                   RADS gap penalties: Terminal extension [-50]
+    --rads_T <int>                   RADS gap penalties: Terminal opening [-100]
+    --rampage_g <int>                RAMPAGE gap penalties: Internal extension [-1]
+    --rampage_G <int>                RAMPAGE gap penalties: Internal opening [-10]
+    --rampage_T <int>                RAMPAGE gap penalties: Terminal opening [0]
+    --rampage_t <int>                RAMPAGE gap penalties: Terminal extension [0]
+```
+
+#### Misc
+##### Authors
+The core algorithms and original website were implemented by January Weiner. The rest of the team is:
+* Erich Bornberg-Bauer (ebb@uni-muenster.de)
+* Sonja Gath (s.grath@uni-muenster.de)
+* Andrew D. Moore (radmoore@uni-muenster.de)
+* Nicolas Terrapon (n.terrapon@uni-muenster.de)
+
+##### How do I reference?
+As previously mentioned, this is very much work in progress (we are currently working on a publication
+describing RADS/RAMPAGE). Until then, please contact us before using RADS/RAMPAGE in your work.
+
+##### Copyright
+<p>
+Copyright © 2011-2012
+Evolutionary Bioinformatics Group 
+Insitute for Evolution and Biodiversity 
+University of Muenster, Germany
+</p>
+
+##### Warranty
+This software is provided “as is” and without any express or implied warranties, 
+including, without limitation, the implied warranties of merchantibility and fitness 
+for a particular purpose.
 
 
