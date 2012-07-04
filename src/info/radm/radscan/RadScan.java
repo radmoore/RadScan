@@ -1,15 +1,13 @@
 package info.radm.radscan;
 
+import info.radm.pbar.ProgressBar;
 import info.radm.radscan.ds.Protein;
 import info.radm.radscan.utils.MutableInt;
-import info.radm.radscan.utils.ProgressBar;
 import info.radm.radscan.utils.RadsMessenger;
 import info.radm.radscan.utils.RadsWriter;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -135,12 +133,18 @@ public class RadScan {
 				ArrayList<Protein> proteins = resultParser.getProteins();
 				
 				ProgressBar pBar = new ProgressBar(proteins.size(), "Writing search results");
-				pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true, true);
+				try {
+					pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				
 				// first write (regular) results
 				int i = 1;
 				for (Protein p: proteins) {
-					pBar.setVal(i);
+					pBar.setCurrentVal(i);
 					writer.writeln(p.toString());
 					i++;
 				}
@@ -344,11 +348,11 @@ public class RadScan {
 		//MapUtilities.sortByValue(tmpScores);
 		
 		ProgressBar pBar = new ProgressBar(tmpFreq.size(), "Writing unique architectures");
-		pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, false, true);
+		pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, false);
 		archWriter.writeln( "# FREQUENCY, ARCHITECTURE");
 		int i = 1;
 		for (Entry<String, MutableInt> e: tmpFreq.entrySet()) {
-			pBar.setVal(i);
+			pBar.setCurrentVal(i);
 			MutableInt mint = e.getValue();
 			archWriter.writeln( ""+mint.get()+", "+(String) e.getKey());
 			i++;

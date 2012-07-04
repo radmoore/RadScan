@@ -1,6 +1,6 @@
 package info.radm.radscan;
 
-import info.radm.radscan.utils.ProgressBar;
+import info.radm.pbar.ProgressBar;
 
 public interface RADSQuery {
 

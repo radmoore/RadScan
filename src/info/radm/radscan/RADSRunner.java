@@ -1,6 +1,6 @@
 package info.radm.radscan;
 
-import info.radm.radscan.utils.ProgressBar;
+import info.radm.pbar.ProgressBar;
 import info.radm.radscan.utils.RadsMessenger;
 
 import java.io.BufferedReader;
@@ -50,7 +50,7 @@ public class RADSRunner{
 		
 		try {
 			if (!quiet)
-				pBar.start();
+				pBar.startIntermediate();
 			
 			reader = read( this.query.getQueryString() );
 			String line = null;

@@ -1,6 +1,6 @@
 package info.radm.radscan;
 
-import info.radm.radscan.utils.ProgressBar;
+import info.radm.pbar.ProgressBar;
 import info.radm.radscan.utils.RadsMessenger;
 
 import java.io.BufferedReader;
@@ -35,7 +35,7 @@ public class QueryBuilder implements RADSQuery{
 	 * 
 	 */
 	public QueryBuilder() {	
-		this.pBar = new ProgressBar(500, "Inititating", ProgressBar.INTERMEDIATE_MODE);
+		this.pBar = new ProgressBar("Inititating");
 	}
 	
 	

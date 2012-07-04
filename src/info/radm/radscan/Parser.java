@@ -3,7 +3,7 @@ package info.radm.radscan;
 import info.radm.radscan.ds.Domain;
 import info.radm.radscan.ds.Protein;
 import info.radm.radscan.utils.MapUtilities;
-import info.radm.radscan.utils.ProgressBar;
+import info.radm.pbar.ProgressBar;
 import info.radm.radscan.utils.RadsWriter;
 
 import java.io.BufferedReader;
@@ -78,7 +78,7 @@ public class Parser {
 	 * @param writer
 	 */
 	public void parse(RadsWriter writer) {
-		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true, true);
+		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
 		String msg = "Writing hits to file";
 		if (IDonly)
 			msg = "Writing IDs to file"; 
@@ -109,7 +109,7 @@ public class Parser {
 					else
 						writer.writeln(line);
 					val++;
-					pbar.setVal(val);
+					pbar.setCurrentVal(val);
 				}
 				else {
 					if (IDonly)
@@ -118,7 +118,7 @@ public class Parser {
 				}
 			}
 			val++;
-			pbar.setVal(val);
+			pbar.setCurrentVal(val);
 			writer.destroy();
 			pbar.finish(true);
 		}
@@ -149,7 +149,7 @@ public class Parser {
 	 */
 	public void buildProteinDS() {
 		proteins = new ArrayList<Protein>();
-		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true, true);
+		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
 		pbar.setMessage("Post-processing: Building DS");
 		pbar.setMaxVal(maxHits);
 		BufferedReader reader = null;
@@ -172,7 +172,7 @@ public class Parser {
 						proteins.add(p);
 					p = new Protein( pid, Integer.valueOf(fields[1]) ); 
 					val++;
-					pbar.setVal(val);
+					pbar.setCurrentVal(val);
 				}
 				else {
 					String[] fields = line.split("\\t");
@@ -186,7 +186,7 @@ public class Parser {
 			}
 			proteins.add(p);
 			val++;
-			pbar.setVal(val);
+			pbar.setCurrentVal(val);
 			pbar.finish(true);
 				
 		}
