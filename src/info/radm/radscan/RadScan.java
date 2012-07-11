@@ -43,7 +43,7 @@ public class RadScan {
             
             if (cl.hasOption("h")) {
             	f.printHelp("radscan [OPTIONS] -in <query>",
-        	        	"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
+        	        	"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
         			System.exit(0);
             }
             	
@@ -173,19 +173,19 @@ public class RadScan {
 		catch (MissingOptionException e) {
 			//System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>", 
-        		"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
+        		"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
 			System.exit(-1);
 		}
 		catch (MissingArgumentException e) {
 			System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>", 
-	        	"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
+	        	"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
 			System.exit(-1);
 		}
 		catch (UnrecognizedOptionException e) {
 			System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>",
-	        	"Rapid Alignment Domain Search - find proteins with similar architectures\n", opt, "");
+	        	"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
 			System.exit(-1);
 		}
 		catch (ParseException e) {
