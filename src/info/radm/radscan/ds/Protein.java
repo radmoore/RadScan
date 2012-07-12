@@ -73,9 +73,9 @@ public class Protein implements Comparable<Protein>{
 	
 	public String toString() {
 		StringBuilder xdom = new StringBuilder();
-		xdom.append(">"+pid+"\t"+length);
+		xdom.append(">"+pid+"\t"+length+NEW_LINE);
 		for (Domain d : domains)
-			xdom.append(d.toString());
+			xdom.append(d.toString()+NEW_LINE);
 		return xdom.toString();
 	}
 	
@@ -104,7 +104,7 @@ public class Protein implements Comparable<Protein>{
 	
 	
 	public void collapse(int repno) {
-		TreeSet<Domain> collpasedDomains = new TreeSet<Domain>();
+		ArrayList<Domain> collpasedDomains = new ArrayList<Domain>();
 		
 		Domain lastDom = null;
 		int repLength = 1;
@@ -117,17 +117,24 @@ public class Protein implements Comparable<Protein>{
 			
 			if (lastDom.did.equals(cDom.did))
 				repLength += 1;
+			
 			else {
 				if (repLength >= repno) {
 					Domain firstRepDom = domains.get(domains.indexOf(cDom)-repLength);
 					Domain d = new Domain(lastDom.did, firstRepDom.from, lastDom.to);
-					d.addComment("pseudo: collapsed "+repLength);
+					d.addComment("collapsed "+repLength+" instances");
 					d.addEvalue(-1);
+					collpasedDomains.add(d);
+				}
+				else {
+					collpasedDomains.add(lastDom);
 				}
 				repLength = 1;
 			}
+			lastDom = cDom;
 		}
-		this.domains = new ArrayList<Domain>(collpasedDomains);
+		collpasedDomains.add(lastDom);
+		this.domains = collpasedDomains;
 	}
 	
 	

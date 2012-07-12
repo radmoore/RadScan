@@ -123,6 +123,19 @@ public class RadScan {
 			if (cl.hasOption("max"))
 				max = Integer.valueOf(cl.getOptionValue("max"));
 
+			
+			if (cl.hasOption("c")) {
+				int repNo = Integer.valueOf(cl.getOptionValue("c"));
+				ProgressBar pbar = new ProgressBar(proteins.size(), "Collapsing repeats");
+				int i = 0;
+				for (Protein p : proteins) {
+					p.collapse(repNo);
+					pbar.setCurrentVal(i);
+					i++;
+				}
+				pbar.setCurrentVal(i);
+			}
+			
 			//TODO: nicify output
 			if (cl.hasOption("u")) {
 				RadsWriter archWriter;
@@ -395,6 +408,12 @@ public class RadScan {
 	            .withLongOpt("unique")
 	            .create("u");
 
+		@SuppressWarnings("static-access")
+		Option collapse = OptionBuilder.withArgName("int")
+	            .hasArg()
+	            .withDescription("Collpase domain repeats with more than <int> units")
+	            .withLongOpt("collapse")
+	            .create("c");
 		
 		@SuppressWarnings("static-access")
 		Option matrix = OptionBuilder.withArgName("substitution matrix")
@@ -416,6 +435,7 @@ public class RadScan {
 		opt.addOption(matrix);
 		opt.addOption(arrstr);
 		opt.addOption(scoreTable);
+		opt.addOption(collapse);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");
 		opt.addOption("version", false, "Print RadScan version and exit");
 		
