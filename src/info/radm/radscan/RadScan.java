@@ -2,15 +2,12 @@ package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
 import info.radm.radscan.ds.Protein;
-import info.radm.radscan.utils.MutableInt;
 import info.radm.radscan.utils.RadsMessenger;
 import info.radm.radscan.utils.RadsWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
