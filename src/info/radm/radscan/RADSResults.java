@@ -10,6 +10,7 @@ public class RADSResults {
 	private String xdomURL, crampageOut, jobURL, jobID, runtime;
 	private int hits = 0;
 	private RADSQuery query;
+	private boolean rampageRun = false; 
 	
 	/**
 	 * 
@@ -35,6 +36,11 @@ public class RADSResults {
 	 */
 	public void setNumHits(int hits_n) {
 		this.hits = hits_n;
+	}
+	
+	
+	public void setRampageRun() {
+		this.rampageRun = true;
 	}
 	
 	
@@ -81,6 +87,14 @@ public class RADSResults {
 	 */
 	public String getJobID() {
 		return this.jobID;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isRampageRun() {
+		return rampageRun;
 	}
 	
 	

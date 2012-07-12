@@ -20,7 +20,7 @@ public class QueryBuilder implements RADSQuery{
 	private String queryString = null, queryID = "rawseq", querySequence = null;
 	private int format = -1;
 	private File queryFile;
-	private boolean quiet = false, benchmarkMode = false;
+	private boolean quiet = false, benchmarkMode = false, rampageRun = false;
 	private String seqChecksum;
 	private ProgressBar pBar;
 	private String database = "uniprot", algo = "rads", matrix = "BLOSUM62";
@@ -75,6 +75,8 @@ public class QueryBuilder implements RADSQuery{
 	 */
 	public void setAlgorithm(String algo) {
 		this.algo = algo.toLowerCase();
+		if ( this.algo.equals("rampage") )
+			rampageRun = true;
 	}
 	
 	
@@ -109,6 +111,10 @@ public class QueryBuilder implements RADSQuery{
 		return this.benchmarkMode;
 	}
 	
+	
+	public boolean isRampageRun() {
+		return this.rampageRun;
+	}	
 	
 	/**
 	 * 
@@ -415,6 +421,8 @@ public class QueryBuilder implements RADSQuery{
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-	}	
+	}
+
+
 	
 }

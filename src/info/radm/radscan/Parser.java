@@ -26,8 +26,6 @@ public class Parser {
 	private ProgressBar pbar;
 	private RADSQuery query;
 	private int maxHits = -1;
-	private boolean IDonly = false;
-	//private TreeMap<String, Protein> proteins = null;
 	private RADSResults results;
 	private List<Map.Entry<String, Integer>> scoreTable;
 	private HashMap<String, Integer> radsScores;
@@ -53,15 +51,6 @@ public class Parser {
 	 */
 	public void setMaxHits(int maxHits) {
 		this.maxHits = maxHits;
-	}
-	
-	
-	/**
-	 * 
-	 * @param IDonly
-	 */
-	public void setIDonlyMode(boolean IDonly) {
-		this.IDonly = IDonly;
 	}
 	
 	
@@ -112,8 +101,7 @@ public class Parser {
 					
 					p = new Protein( pid, Integer.valueOf(fields[1]) );
 					p.setRADSScore(radsScores.get(pid));
-					//TODO: implement STATIC varaible for Algorithm
-					if (query.getAlgorithm() == "RAMPAGE")
+					if (query.isRampageRun())
 						p.setRAMPAGEScore(rampageScores.get(pid));
 					val++;
 					pbar.setCurrentVal(val);

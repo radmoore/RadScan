@@ -7,8 +7,6 @@ public interface RADSQuery {
 	public static int FASTA = 0;
 	public static int XDOM = 1;
 	public static int RAWSEQ = 2;
-	public static int RADS = 0;
-	public static int RAMPAGE = 0;
 	
 	public RADSQuery build();
 	
@@ -23,6 +21,8 @@ public interface RADSQuery {
 	public String getDatabase();
 	
 	public boolean isBenchmarking();
+	
+	public boolean isRampageRun();
 	
 	public String getAlgorithm();
 	

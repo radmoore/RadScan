@@ -37,7 +37,6 @@ public class RadScan {
 		f.setSyntaxPrefix("Usage: ");
 		
 		ArrayList<RadsWriter> writers = new ArrayList<RadsWriter>();
-		//String datestamp = new SimpleDateFormat("hhmmss-ddmmyy").format(new Date());
 		
 		try {
 			// add options
@@ -157,16 +156,22 @@ public class RadScan {
 				
 			//TODO: nicify output
 			if (cl.hasOption("tbl")) {
-			
+				
 				String tblout = cl.getOptionValue("tbl");
 				try {
 					RadsWriter scoreWriter = new RadsWriter(tblout, "Score table");
 					writers.add(scoreWriter);
 					String queryID = results.getQuery().getQueryID();
-					scoreWriter.writeln("QUERY\tSUBJECT\tRADS-SCORE");
-					for (Protein p : proteins)
-						scoreWriter.writeln(queryID+"\t"+p.getID()+"\t"+p.getRADSScore());
-					
+					String outLine = "QUERY\tSUBJECT\tRADS";
+					if (results.getQuery().isRampageRun())
+						outLine += "\tRAMPAGE";
+					scoreWriter.writeln(outLine);
+					for (Protein p : proteins) {
+						outLine = queryID+"\t"+p.getID()+"\t"+p.getRADSScore();
+						if (results.getQuery().isRampageRun())
+							outLine += "\t"+p.getRAMPAGEScore();
+						scoreWriter.writeln(outLine);
+					}
 				} 
 				catch (IOException e) {
 					e.printStackTrace();
@@ -235,24 +240,6 @@ public class RadScan {
     		throw new MissingOptionException("Unknown algorithm. Consider RAMPAGE (DEFAULT: RADS)");
 
 	}
-	
-	
-	/**
-	 * 
-	 * @param cl
-	 * @param qBuilder
-	 * @throws MissingOptionException
-	 */
-	private static void setDatabase(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException{
-	    	String requestedDatabase = cl.getOptionValue("d");
-	    	if (! (requestedDatabase.equals("swisspfam")) ||
-	    			(requestedDatabase.equals("simap")) ) {
-	    	
-	    		throw new MissingOptionException("Unknown DATABASE request. Use swisspfam or simap");
-	    	}
-	    	qBuilder.setDatabase(cl.getOptionValue("d"));
-	}
-	
 	
 	/**
 	 * 
@@ -341,51 +328,6 @@ public class RadScan {
 	
 	/**
 	 * 
-	 * @param proteins
-	 * @param cl
-	 * @param writers
-	 */
-	private static void constructArchitectureFreq(ArrayList<Protein> proteins, CommandLine cl, ArrayList<RadsWriter> writers) { 
-		
-		// now create Architecture Freq table
-		RadsWriter archWriter = null;
-		try {
-			archWriter = new RadsWriter(cl.getOptionValue("arch"), "Unique architecture frequencies");
-		} catch (IOException ioe) {
-			System.err.println("ERROR: could not create/write to "+cl.getOptionValue("a"));
-			System.exit(-1);
-		}
-		
-		Map<String, MutableInt> tmpFreq = new HashMap<String, MutableInt>();
-		for (Protein p: proteins) {
-			MutableInt freq = tmpFreq.get(p.architecture());
-			if (freq == null) {
-				MutableInt mint = new MutableInt();
-				tmpFreq.put(p.architecture(), mint);
-			}
-			else
-				freq.inc();
-		}
-		
-		//MapUtilities.sortByValue(tmpScores);
-		
-		ProgressBar pBar = new ProgressBar(tmpFreq.size(), "Writing unique architectures");
-		pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, false);
-		archWriter.writeln( "# FREQUENCY, ARCHITECTURE");
-		int i = 1;
-		for (Entry<String, MutableInt> e: tmpFreq.entrySet()) {
-			pBar.setCurrentVal(i);
-			MutableInt mint = e.getValue();
-			archWriter.writeln( ""+mint.get()+", "+(String) e.getKey());
-			i++;
-		}
-		pBar.finish(true);
-		writers.add(archWriter);
-	}
-	
-	
-	/**
-	 * 
 	 * @param opt
 	 */
 	private static void buildOptions(Options opt) {
@@ -433,12 +375,6 @@ public class RadScan {
 	            .create("o");
 		
 		@SuppressWarnings("static-access")
-		Option outFile = OptionBuilder.withArgName("file")
-	            .withDescription("Write results to file (DEFAULT: STDOUT)")
-	            .withLongOpt("outfile")
-	            .create("out");
-		
-		@SuppressWarnings("static-access")
 		Option arrstr = OptionBuilder.withDescription("Return hits as string of domain IDs (separated by ;)")
 	            .create("arrstr");
 		
@@ -454,17 +390,7 @@ public class RadScan {
 	            .hasArg()
 	            .withLongOpt("score-table")
 	            .create("tbl");
-		
-		
-		/**
-		@SuppressWarnings("static-access")
-		Option database = OptionBuilder.withArgName("dbname")
-	            .withDescription("RADS database to scan against " +
-	            		"[simap or swisspfam, DEFAULT: swisspfam]")
-	            .hasArg()
-	            .withLongOpt("database")
-	            .create("d");
-		**/		
+	
 		@SuppressWarnings("static-access")
 		Option unique = OptionBuilder.withArgName("file")
 	            .hasArg()
@@ -488,7 +414,6 @@ public class RadScan {
 		opt.addOption(maxNumResults);
 		opt.addOption(onlyIDs);
 		opt.addOption(help);
-		//opt.addOption(database);
 		opt.addOption(quiet);
 		opt.addOption(unique);
 		opt.addOption(matrix);
