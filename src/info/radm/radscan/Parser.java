@@ -1,10 +1,8 @@
 package info.radm.radscan;
 
+import info.radm.pbar.ProgressBar;
 import info.radm.radscan.ds.Domain;
 import info.radm.radscan.ds.Protein;
-import info.radm.radscan.utils.MapUtilities;
-import info.radm.pbar.ProgressBar;
-import info.radm.radscan.utils.RadsWriter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * 
@@ -28,10 +27,13 @@ public class Parser {
 	private RADSQuery query;
 	private int maxHits = -1;
 	private boolean IDonly = false;
-	private ArrayList<Protein> proteins = null;
+	//private TreeMap<String, Protein> proteins = null;
 	private RADSResults results;
 	private List<Map.Entry<String, Integer>> scoreTable;
-	
+	private HashMap<String, Integer> radsScores;
+	private HashMap<String, Integer> rampageScores;
+	private TreeSet<Protein> proteins = null;
+
 	
 	/**
 	 * 
@@ -42,7 +44,6 @@ public class Parser {
 		this.query = results.getQuery();
 		this.pbar = query.getProgressBar();
 		this.maxHits = results.getHitsNumber();
-		buildScoreTable();
 	}
 	
 	
@@ -73,88 +74,25 @@ public class Parser {
 	}
 	
 	
-	/**
-	 * 
-	 * @param writer
-	 */
-	public void parse(RadsWriter writer) {
-		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
-		String msg = "Writing hits to file";
-		if (IDonly)
-			msg = "Writing IDs to file"; 
-		pbar.setMessage(msg);
-		pbar.setMaxVal(maxHits);
-		if ( writer.isStdOutMode() )
-			pbar.setQuietMode(true);
-		
-		BufferedReader reader = null;
-		int val = 0;
-		
-		try {
-			reader = read(results.getXdomUrl());
-			String line = null;	
-			while ( (line = reader.readLine()) != null) {
-				
-				if (line.substring(0, 1).equals(">")) {
-					if ( (maxHits != -1) && (val >= maxHits) ) {
-						System.err.println("MAX REACHED: "+val);
-						break;
-					}
-					
-					String[] fields = line.split("\\t");
-					String pid = fields[0].replace(">", "");
-					
-					if (IDonly)
-						writer.writeln(pid);
-					else
-						writer.writeln(line);
-					val++;
-					pbar.setCurrentVal(val);
-				}
-				else {
-					if (IDonly)
-						continue;
-					writer.writeln(line);
-				}
-			}
-			val++;
-			pbar.setCurrentVal(val);
-			writer.destroy();
-			pbar.finish(true);
-		}
-		catch(MalformedURLException mue) {
-			mue.printStackTrace();
-		}
-		catch(IOException ioe) {
-			ioe.printStackTrace();
-		}
-		
-	}
-	
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public ArrayList<Protein> getProteins() {
-		if (proteins == null)
-			buildProteinDS();
+	public TreeSet<Protein> parse() {
+		readScoreTable();
+		readHits();
 		return proteins;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @return
 	 */
-	public void buildProteinDS() {
-		proteins = new ArrayList<Protein>();
+	private void readHits() {
+		
 		pbar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
-		pbar.setMessage("Post-processing: Building DS");
+		pbar.setMessage("Extracting hits");
 		pbar.setMaxVal(maxHits);
 		BufferedReader reader = null;
 		int val = 0;
 		Protein p = null;
+		proteins = new TreeSet<Protein>();
 		
 		try {
 			reader = read(results.getXdomUrl());
@@ -168,9 +106,15 @@ public class Parser {
 					
 					String[] fields = line.split("\\t");
 					String pid = fields[0].replace(">", "");
+					
 					if (p != null)
 						proteins.add(p);
-					p = new Protein( pid, Integer.valueOf(fields[1]) ); 
+					
+					p = new Protein( pid, Integer.valueOf(fields[1]) );
+					p.setRADSScore(radsScores.get(pid));
+					//TODO: implement STATIC varaible for Algorithm
+					if (query.getAlgorithm() == "RAMPAGE")
+						p.setRAMPAGEScore(rampageScores.get(pid));
 					val++;
 					pbar.setCurrentVal(val);
 				}
@@ -214,41 +158,50 @@ public class Parser {
 	/**
 	 * 
 	 */
-	private void buildScoreTable() {
+	private void readScoreTable() {
 		
 		BufferedReader reader = null;
+		String subject = null;
 		String line = null;
-		StringBuilder scoreLine = new StringBuilder();
-		int score = 0;
-		Map<String, Integer> tmpScores = new HashMap<String, Integer>();
-		pbar.setMessage("Constructing score table");
+		int radsScore = 0, rampageScore = 0;
+		radsScores = new HashMap<String, Integer>();
+		rampageScores = new HashMap<String, Integer>();
+		
+		
+		pbar.setMessage("Reading score table");
+		
 		try {
-			reader = read(results.getCrampageOut());	
+			reader = read(results.getCrampageOut());
+			
 			while ( (line = reader.readLine()) != null) {
+			
 				if (line.contains("QUERY")) {
-					if (scoreLine.length() != 0)
-						tmpScores.put(scoreLine.toString(), score);
-					
-					scoreLine = new StringBuilder();
-					String[] fields = line.split("\\s+");
-					scoreLine.append(fields[1]);
-					scoreLine.append("\t");
+					if (subject != null) {
+						radsScores.put(subject, radsScore);
+						rampageScores.put(subject, rampageScore);
+					}
 				}
 				else if (line.contains("SUBJECT")) {
 					String[] fields = line.split("\\s+");
-					scoreLine.append(fields[1]);
-					scoreLine.append("\t");
+					subject = fields[1];
 				}
 				else if (line.contains("RADS SCORE")) {
 					String[] fields = line.split("\\s+");
-					score = Integer.valueOf(fields[2]);
+					radsScore = Integer.valueOf(fields[2]);
 				}
+				else if (line.contains("RAMPAGE SCORE")) {
+					String[] fields = line.split("\\s+");
+					rampageScore = Integer.valueOf(fields[2]);
+				}
+			}
+			if (subject != null) {
+				radsScores.put(subject, radsScore);
+				rampageScores.put(subject, rampageScore);
 			}
 		}
 		catch (IOException ioe) {
 			
 		}
-		scoreTable = MapUtilities.sortByValue(tmpScores);
 	}
 	
 }

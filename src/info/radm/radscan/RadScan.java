@@ -8,9 +8,11 @@ import info.radm.radscan.utils.RadsWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -24,6 +26,8 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class RadScan {
+	
+	protected static final String VERSION = "0.3.2";
 	
 	public static void main (String[] args) {
 		
@@ -41,12 +45,18 @@ public class RadScan {
             PosixParser parser = new PosixParser();
             CommandLine cl = parser.parse(opt, args, false);
             
+            // TODO: complete (ensure that this does not trigger MissingOptionException)
             if (cl.hasOption("h")) {
             	f.printHelp("radscan [OPTIONS] -in <query>",
         	        	"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
         			System.exit(0);
             }
-            	
+            // TODO: complete (ensure that this does not trigger MissingOptionException)
+            if (cl.hasOption("version")) {
+            	System.out.println("RadScan version: "+VERSION);
+            	System.out.println("Java: "+System.getProperty("java.runtime.name")+" "+System.getProperty("java.runtime.version"));
+            	System.exit(0);
+            }
             
             // construct a query
             QueryBuilder qBuilder = new QueryBuilder();
@@ -102,55 +112,50 @@ public class RadScan {
 						
 			// Initiate parser
 			Parser resultParser = new Parser(results);
-			int max;
 			
-			if (cl.hasOption("max")) {
-				max = Integer.valueOf(cl.getOptionValue("max"));
-				resultParser.setMaxHits(max);
-			}
+			TreeSet<Protein> proteins = resultParser.parse();
 			
+			boolean idMode = false; 
 			if (cl.hasOption("I"))
-				resultParser.setIDonlyMode(true);
+				idMode = true;
 			
-			// write score table
-			if (! rQuery.isQuiet() ) {
+			boolean arrStringMode = false;
+			if (cl.hasOption("arrstr"))
+				arrStringMode = true;
+			
+			int max = -1, current = 0;
+			if (cl.hasOption("max"))
+				max = Integer.valueOf(cl.getOptionValue("max"));
+			
+			for (Protein p : proteins) {
+				current ++;
+				if (idMode)
+					writer.writeln(p.getID());
+				else if (arrStringMode)
+					writer.writeln(p.getArrString());
+				else
+					writer.writeln(p.toString());
+				if (current == max)
+					break;
+			}
+			
+			if (cl.hasOption("tbl")) {
+			
+				String tblout = cl.getOptionValue("tbl");
 				try {
-					RadsWriter scoreWriter = new RadsWriter(results.getJobID()+"_scores.txt", "Score table of hits");
-					for (Entry<String, Integer> e : resultParser.getScoreTable())
-						scoreWriter.writeln(e.getKey()+"\t"+e.getValue());
+					RadsWriter scoreWriter = new RadsWriter(tblout, "Score table");
 					writers.add(scoreWriter);
+					String queryID = results.getQuery().getQueryID();
+					scoreWriter.writeln("QUERY\tSUBJECT\tRADS-SCORE");
+					for (Protein p : proteins)
+						scoreWriter.writeln(queryID+"\t"+p.getID()+"\t"+p.getRADSScore());
+					
 				} 
-				catch (IOException ioe) {
-					System.err.println("ERROR: could not write score table to score");
-				}
-			}
-			
-			// no post-processing needed
-			if (!cl.hasOption("u")) {
-				resultParser.parse(writer);
-			}
-			else {
-				ArrayList<Protein> proteins = resultParser.getProteins();
-				
-				ProgressBar pBar = new ProgressBar(proteins.size(), "Writing search results");
-				try {
-					pBar.setProgressMode(ProgressBar.PROGRESSABLE_MODE, true);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				
 				
-				// first write (regular) results
-				int i = 1;
-				for (Protein p: proteins) {
-					pBar.setCurrentVal(i);
-					writer.writeln(p.toString());
-					i++;
-				}
-				
-				// create and write architecture freq file 
-				constructArchitectureFreq(proteins, cl, writers);
 			}
 			
 			// inform of all outputfiles created (if any)
@@ -171,7 +176,7 @@ public class RadScan {
 			}
 		}
 		catch (MissingOptionException e) {
-			//System.err.println(e.getMessage());
+			System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>", 
         		"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
 			System.exit(-1);
@@ -417,10 +422,23 @@ public class RadScan {
 	            .create("out");
 		
 		@SuppressWarnings("static-access")
+		Option arrstr = OptionBuilder.withDescription("Return hits as string of domain IDs (separated by ;)")
+	            .create("arrstr");
+		
+		@SuppressWarnings("static-access")
 		Option quiet = OptionBuilder
 	            .withDescription("Quiet mode - surpress all output except for results (incl. score table)")
 	            .withLongOpt("quiet")
 	            .create("q");
+		
+		@SuppressWarnings("static-access")
+		Option scoreTable = OptionBuilder.withArgName("file")
+	            .withDescription("Write score table to file (will ignore max option)")
+	            .hasArg()
+	            .withLongOpt("score-table")
+	            .create("tbl");
+		
+		
 		/**
 		@SuppressWarnings("static-access")
 		Option database = OptionBuilder.withArgName("dbname")
@@ -457,7 +475,10 @@ public class RadScan {
 		opt.addOption(quiet);
 		//opt.addOption(unique);
 		opt.addOption(matrix);
+		opt.addOption(arrstr);
+		opt.addOption(scoreTable);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");
+		opt.addOption("version", false, "Print RadScan version and exit");
 		
 		// RADS and RAMPAGE options
 		
