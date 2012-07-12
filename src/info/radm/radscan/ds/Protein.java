@@ -1,7 +1,13 @@
 package info.radm.radscan.ds;
 
+import info.radm.radscan.utils.MapUtilities;
+
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
 public class Protein implements Comparable<Protein>{
 	
@@ -26,6 +32,14 @@ public class Protein implements Comparable<Protein>{
 		xdomOut.append(d.toString()+NEW_LINE);
 		domNo ++;
 	}
+		
+	public void setRADSScore(int RADSscore) {
+		this.RADSscore = RADSscore;
+	}
+
+	public void setRAMPAGEScore(int RAMPAGEscore) {
+		this.RAMPAGEscore = RAMPAGEscore;
+	}
 	
 	public String getID() {
 		return this.pid;
@@ -40,15 +54,7 @@ public class Protein implements Comparable<Protein>{
 		}
 		return arrStr.toString();
 	}
-	
-	public void setRADSScore(int RADSscore) {
-		this.RADSscore = RADSscore;
-	}
 
-	public void setRAMPAGEScore(int RAMPAGEscore) {
-		this.RAMPAGEscore = RAMPAGEscore;
-	}
-	
 	public int getRADSScore() {
 		return this.RADSscore;
 	}
@@ -59,6 +65,10 @@ public class Protein implements Comparable<Protein>{
 	
 	public int getDomainNo() {
 		return domNo;
+	}
+	
+	public int getLength() {
+		return this.length;
 	}
 	
 	public ArrayList<Domain> getDomains() {
@@ -92,5 +102,17 @@ public class Protein implements Comparable<Protein>{
 			return EQUAL;
 	}
 	
+	public static List<Entry<String, Integer>> getUniqueArchitectures(TreeSet<Protein> proteins) {
+		Map<String, Integer> uniqueArrs = new HashMap<String, Integer>();
+		for (Protein p : proteins) {
+			Integer freq = uniqueArrs.get(p.getArrString());
+			if (freq == null)
+				uniqueArrs.put(p.getArrString(), 1);
+			else
+				uniqueArrs.put(p.getArrString(), freq+1);
+		}
+		return MapUtilities.sortByValue(uniqueArrs);	
+		
+	}
 		
 }

@@ -8,8 +8,8 @@ import info.radm.radscan.utils.RadsWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
@@ -126,7 +126,22 @@ public class RadScan {
 			int max = -1, current = 0;
 			if (cl.hasOption("max"))
 				max = Integer.valueOf(cl.getOptionValue("max"));
-			
+
+			//TODO: nicify output
+			if (cl.hasOption("u")) {
+				RadsWriter archWriter;
+				try {
+					archWriter = new RadsWriter(cl.getOptionValue("u"), "Frequency table of unique architectures");
+					writers.add(archWriter);
+					List<Entry<String, Integer>> uniqArchs = Protein.getUniqueArchitectures(proteins);
+					for (Entry<String, Integer> e : uniqArchs)
+						archWriter.writeln(e.getKey()+"\t"+e.getValue());
+				} 
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}	
+			}
+
 			for (Protein p : proteins) {
 				current ++;
 				if (idMode)
@@ -138,7 +153,9 @@ public class RadScan {
 				if (current == max)
 					break;
 			}
-			
+
+				
+			//TODO: nicify output
 			if (cl.hasOption("tbl")) {
 			
 				String tblout = cl.getOptionValue("tbl");
@@ -447,14 +464,14 @@ public class RadScan {
 	            .hasArg()
 	            .withLongOpt("database")
 	            .create("d");
-		
+		**/		
 		@SuppressWarnings("static-access")
 		Option unique = OptionBuilder.withArgName("file")
 	            .hasArg()
-	            .withDescription("Return unique architecture frequency table (post-processing)")
+	            .withDescription("Return unique architecture frequency table (ignores max)")
 	            .withLongOpt("unique")
 	            .create("u");
-		**/
+
 		
 		@SuppressWarnings("static-access")
 		Option matrix = OptionBuilder.withArgName("substitution matrix")
@@ -473,7 +490,7 @@ public class RadScan {
 		opt.addOption(help);
 		//opt.addOption(database);
 		opt.addOption(quiet);
-		//opt.addOption(unique);
+		opt.addOption(unique);
 		opt.addOption(matrix);
 		opt.addOption(arrstr);
 		opt.addOption(scoreTable);
