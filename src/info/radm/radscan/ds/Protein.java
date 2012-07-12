@@ -14,25 +14,21 @@ public class Protein implements Comparable<Protein>{
 	private String pid;
 	private int length, domNo, RADSscore, RAMPAGEscore;
 	private ArrayList<Domain> domains = new ArrayList<Domain>();
-	private StringBuilder xdomOut;
 	private final String NEW_LINE = System.getProperty("line.separator");
 	private final int BEFORE = -1;
     private final int EQUAL = 0;
     private final int AFTER = 1;
-	
+    
 	public Protein (String pid, int length) {
 		this.pid = pid;
 		this.length = length;
-		this.xdomOut = new StringBuilder();
-		xdomOut.append(">"+pid+"\t"+length+NEW_LINE);
 	}
 	
 	public void addDomain(Domain d) {
 		domains.add(d);
-		xdomOut.append(d.toString()+NEW_LINE);
 		domNo ++;
 	}
-		
+	
 	public void setRADSScore(int RADSscore) {
 		this.RADSscore = RADSscore;
 	}
@@ -76,7 +72,11 @@ public class Protein implements Comparable<Protein>{
 	}
 	
 	public String toString() {
-		return xdomOut.toString();
+		StringBuilder xdom = new StringBuilder();
+		xdom.append(">"+pid+"\t"+length);
+		for (Domain d : domains)
+			xdom.append(d.toString());
+		return xdom.toString();
 	}
 	
 	public String architecture() {
@@ -101,6 +101,36 @@ public class Protein implements Comparable<Protein>{
 		else
 			return EQUAL;
 	}
+	
+	
+	public void collapse(int repno) {
+		TreeSet<Domain> collpasedDomains = new TreeSet<Domain>();
+		
+		Domain lastDom = null;
+		int repLength = 1;
+		for (Domain cDom: domains) {
+			
+			if (lastDom == null) {
+				lastDom = cDom;
+				continue;
+			}
+			
+			if (lastDom.did.equals(cDom.did))
+				repLength += 1;
+			else {
+				if (repLength >= repno) {
+					Domain firstRepDom = domains.get(domains.indexOf(cDom)-repLength);
+					Domain d = new Domain(lastDom.did, firstRepDom.from, lastDom.to);
+					d.addComment("pseudo: collapsed "+repLength);
+					d.addEvalue(-1);
+				}
+				repLength = 1;
+			}
+		}
+		this.domains = new ArrayList<Domain>(collpasedDomains);
+	}
+	
+	
 	
 	public static List<Entry<String, Integer>> getUniqueArchitectures(TreeSet<Protein> proteins) {
 		Map<String, Integer> uniqueArrs = new HashMap<String, Integer>();
