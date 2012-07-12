@@ -27,7 +27,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class RadScan {
 	
-	protected static final String VERSION = "0.3.2";
+	protected static final String VERSION = "0.3.4";
 	
 	public static void main (String[] args) {
 		
