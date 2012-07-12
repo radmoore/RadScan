@@ -192,12 +192,13 @@ public class RadScan {
 			
 			// inform of all outputfiles created (if any)
 			for (RadsWriter rw : writers) {
-				
-				if (rw.isToFile()) {
-					RadsMessenger.writeMessage(rw.getFileDescription()+
-							" written to " +
-							rw.getOutFilePath());
-					rw.destroy();
+				if (!qBuilder.isQuiet()) {
+					if (rw.isToFile()) {
+						RadsMessenger.writeMessage(rw.getFileDescription()+
+								" written to " +
+								rw.getOutFilePath());
+						rw.destroy();
+					}
 				}
 			}
 			
@@ -390,7 +391,7 @@ public class RadScan {
 		
 		@SuppressWarnings("static-access")
 		Option quiet = OptionBuilder
-	            .withDescription("Quiet mode - surpress all output except for results (incl. score table)")
+	            .withDescription("Quiet mode - surpress all output except for results")
 	            .withLongOpt("quiet")
 	            .create("q");
 		
