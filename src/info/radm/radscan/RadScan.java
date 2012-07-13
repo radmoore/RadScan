@@ -24,7 +24,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class RadScan {
 	
-	protected static final String VERSION = "0.4.1";
+	protected static final String VERSION = "0.4.2";
 	
 	public static void main (String[] args) {
 		
@@ -41,178 +41,170 @@ public class RadScan {
             PosixParser parser = new PosixParser();
             CommandLine cl = parser.parse(opt, args, false);
             
-            // TODO: complete (ensure that this does not trigger MissingOptionException)
             if (cl.hasOption("h")) {
             	f.printHelp("radscan [OPTIONS] -in <query>",
         	        	"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
         			System.exit(0);
             }
-            // TODO: complete (ensure that this does not trigger MissingOptionException)
-            if (cl.hasOption("version")) {
-            	System.out.println("RadScan version: "+VERSION);
-            	System.out.println("Java: "+System.getProperty("java.runtime.name")+" "+System.getProperty("java.runtime.version"));
-            	System.exit(0);
-            }
-            
-            // construct a query
-            QueryBuilder qBuilder = new QueryBuilder();
-            
-            // set to quiet mode
-            if (cl.hasOption("q"))
-            	qBuilder.setQuietMode(true);
-
-
-			if (cl.hasOption("runtime")) {
-				qBuilder.setQuietMode(true);
-				qBuilder.setBenchmarkMode(true);
-			}
-
-            
-            // set inputfile
-            qBuilder.setQueryProtein(cl.getOptionValue("i"));
-
-            // set algorithm
-            if (cl.hasOption("a")) {
-            	setAlgorithm(cl, qBuilder);
-            	if (qBuilder.getAlgorithm().equals("RAMPAGE"))
-            		setRampageOptions(cl, qBuilder);
-            	else
-            		setRadsOptions(cl, qBuilder);
-            }
-            
-            // setup writer
-            RadsWriter writer = null;
-            if (cl.hasOption("o")) {			
-            	String outFileName = cl.getOptionValue("o");
-				try {
-					writer = new RadsWriter(outFileName, "XDOM Results");
+            else {
+	            // construct a query
+	            QueryBuilder qBuilder = new QueryBuilder();
+	            
+	            // set to quiet mode
+	            if (cl.hasOption("q"))
+	            	qBuilder.setQuietMode(true);
+	
+	
+				if (cl.hasOption("runtime")) {
+					qBuilder.setQuietMode(true);
+					qBuilder.setBenchmarkMode(true);
 				}
-				catch (IOException ioe) {
-					System.err.println("ERROR: could not create outfile: "+outFileName);
-					System.exit(-1);
-				}	
-			}
-            else 
-            	writer = new RadsWriter();
-            
-            // add writer to list of used writers for later reporting
-            writers.add(writer);
-            
-            // print some information
-            if (!qBuilder.isQuiet())
-            	inform(qBuilder);
-            
-			RADSQuery rQuery = qBuilder.build();
-			RADSRunner rads = new RADSRunner(rQuery);
-			RADSResults results = rads.submit();
-						
-			// Initiate parser
-			Parser resultParser = new Parser(results);
-			
-			TreeSet<Protein> proteins = resultParser.parse();
-			
-			boolean idMode = false; 
-			if (cl.hasOption("I"))
-				idMode = true;
-			
-			boolean arrStringMode = false;
-			if (cl.hasOption("arrstr"))
-				arrStringMode = true;
-			
-			int max = -1, current = 0;
-			if (cl.hasOption("max"))
-				max = Integer.valueOf(cl.getOptionValue("max"));
-
-			
-			if (cl.hasOption("c")) {
-				int repNo = Integer.valueOf(cl.getOptionValue("c"));
-				ProgressBar pbar = new ProgressBar(proteins.size(), "Collapsing repeats");
-				int i = 0;
-				for (Protein p : proteins) {
-					p.collapse(repNo);
-					pbar.setCurrentVal(i);
-					i++;
+	
+	            
+	            // set inputfile
+	            qBuilder.setQueryProtein(cl.getOptionValue("i"));
+	
+	            // set algorithm
+	            if (cl.hasOption("a")) {
+	            	setAlgorithm(cl, qBuilder);
+	            	if (qBuilder.getAlgorithm().equals("RAMPAGE"))
+	            		setRampageOptions(cl, qBuilder);
+	            	else
+	            		setRadsOptions(cl, qBuilder);
+	            }
+	            
+	            // setup writer
+	            RadsWriter writer = null;
+	            if (cl.hasOption("o")) {			
+	            	String outFileName = cl.getOptionValue("o");
+					try {
+						writer = new RadsWriter(outFileName, "XDOM Results");
+					}
+					catch (IOException ioe) {
+						System.err.println("ERROR: could not create outfile: "+outFileName);
+						System.exit(-1);
+					}	
 				}
-				pbar.setCurrentVal(i);
-			}
-			
-			//TODO: nicify output
-			if (cl.hasOption("u")) {
-				RadsWriter archWriter;
-				try {
-					archWriter = new RadsWriter(cl.getOptionValue("u"), "Frequency table of unique architectures");
-					writers.add(archWriter);
-					List<Entry<String, Integer>> uniqArchs = Protein.getUniqueArchitectures(proteins);
-					for (Entry<String, Integer> e : uniqArchs)
-						archWriter.writeln(e.getKey()+"\t"+e.getValue());
-				} 
-				catch (IOException e1) {
-					e1.printStackTrace();
-				}	
-			}
-
-			for (Protein p : proteins) {
-				current ++;
-				if (idMode)
-					writer.writeln(p.getID());
-				else if (arrStringMode)
-					writer.writeln(p.getArrString());
-				else
-					writer.writeln(p.toString());
-				if (current == max)
-					break;
-			}
-
+	            else 
+	            	writer = new RadsWriter();
+	            
+	            // add writer to list of used writers for later reporting
+	            writers.add(writer);
+	            
+	            // print some information
+	            if (!qBuilder.isQuiet())
+	            	inform(qBuilder);
+	            
+				RADSQuery rQuery = qBuilder.build();
+				RADSRunner rads = new RADSRunner(rQuery);
+				RADSResults results = rads.submit();
+							
+				// Initiate parser
+				Parser resultParser = new Parser(results);
 				
-			//TODO: nicify output
-			if (cl.hasOption("tbl")) {
+				TreeSet<Protein> proteins = resultParser.parse();
 				
-				String tblout = cl.getOptionValue("tbl");
-				try {
-					RadsWriter scoreWriter = new RadsWriter(tblout, "Score table");
-					writers.add(scoreWriter);
-					String queryID = results.getQuery().getQueryID();
-					String outLine = "QUERY\tSUBJECT\tRADS";
-					if (results.getQuery().isRampageRun())
-						outLine += "\tRAMPAGE";
-					scoreWriter.writeln(outLine);
+				boolean idMode = false; 
+				if (cl.hasOption("I"))
+					idMode = true;
+				
+				boolean arrStringMode = false;
+				if (cl.hasOption("arrstr"))
+					arrStringMode = true;
+				
+				int max = -1, current = 0;
+				if (cl.hasOption("max"))
+					max = Integer.valueOf(cl.getOptionValue("max"));
+	
+				
+				if (cl.hasOption("c")) {
+					int repNo = Integer.valueOf(cl.getOptionValue("c"));
+					ProgressBar pbar = new ProgressBar(proteins.size(), "Collapsing repeats");
+					int i = 0;
 					for (Protein p : proteins) {
-						outLine = queryID+"\t"+p.getID()+"\t"+p.getRADSScore();
+						p.collapse(repNo);
+						pbar.setCurrentVal(i);
+						i++;
+					}
+					pbar.setCurrentVal(i);
+				}
+				
+				//TODO: nicify output
+				if (cl.hasOption("u")) {
+					RadsWriter archWriter;
+					try {
+						archWriter = new RadsWriter(cl.getOptionValue("u"), "Frequency table of unique architectures");
+						writers.add(archWriter);
+						List<Entry<String, Integer>> uniqArchs = Protein.getUniqueArchitectures(proteins);
+						for (Entry<String, Integer> e : uniqArchs)
+							archWriter.writeln(e.getKey()+"\t"+e.getValue());
+					} 
+					catch (IOException e1) {
+						e1.printStackTrace();
+					}	
+				}
+	
+				for (Protein p : proteins) {
+					current ++;
+					if (idMode)
+						writer.writeln(p.getID());
+					else if (arrStringMode)
+						writer.writeln(p.getArrString());
+					else
+						writer.writeln(p.toString());
+					if (current == max)
+						break;
+				}
+	
+					
+				//TODO: nicify output
+				if (cl.hasOption("tbl")) {
+					
+					String tblout = cl.getOptionValue("tbl");
+					try {
+						RadsWriter scoreWriter = new RadsWriter(tblout, "Score table");
+						writers.add(scoreWriter);
+						String queryID = results.getQuery().getQueryID();
+						String outLine = "QUERY\tSUBJECT\tRADS";
 						if (results.getQuery().isRampageRun())
-							outLine += "\t"+p.getRAMPAGEScore();
+							outLine += "\tRAMPAGE";
 						scoreWriter.writeln(outLine);
+						for (Protein p : proteins) {
+							outLine = queryID+"\t"+p.getID()+"\t"+p.getRADSScore();
+							if (results.getQuery().isRampageRun())
+								outLine += "\t"+p.getRAMPAGEScore();
+							scoreWriter.writeln(outLine);
+						}
+					} 
+					catch (IOException e) {
+						e.printStackTrace();
 					}
-				} 
-				catch (IOException e) {
-					e.printStackTrace();
+					
+					
 				}
 				
+				// inform of all outputfiles created (if any)
+				for (RadsWriter rw : writers) {
+					if (!qBuilder.isQuiet()) {
+						if (rw.isToFile()) {
+							RadsMessenger.writeMessage(rw.getFileDescription()+
+									" written to " +
+									rw.getOutFilePath());
+							rw.destroy();
+						}
+					}
+				}
 				
-			}
-			
-			// inform of all outputfiles created (if any)
-			for (RadsWriter rw : writers) {
+				// RUN COMPLETE //
 				if (!qBuilder.isQuiet()) {
-					if (rw.isToFile()) {
-						RadsMessenger.writeMessage(rw.getFileDescription()+
-								" written to " +
-								rw.getOutFilePath());
-						rw.destroy();
-					}
+					RadsMessenger.writeMessage("Scan complete.");
+					RadsMessenger.printHR();
 				}
-			}
-			
-			// RUN COMPLETE //
-			if (!qBuilder.isQuiet()) {
-				RadsMessenger.writeMessage("Scan complete.");
-				RadsMessenger.printHR();
 			}
 		}
 		catch (MissingOptionException e) {
-			System.err.println(e.getMessage());
 			f.printHelp("radscan [OPTIONS] -in <query>", 
-        		"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
-			System.exit(-1);
+	       		"Rapid Alignment of Domain Strings - find proteins with similar architectures\n", opt, "");
 		}
 		catch (MissingArgumentException e) {
 			System.err.println(e.getMessage());
@@ -438,7 +430,7 @@ public class RadScan {
 		opt.addOption(scoreTable);
 		opt.addOption(collapse);
 		opt.addOption("runtime", false, "show runtime only (for benchmarking)");
-		opt.addOption("version", false, "Print RadScan version and exit");
+		//opt.addOption("version", false, "Print RadScan version and exit");
 		
 		// RADS and RAMPAGE options
 		
