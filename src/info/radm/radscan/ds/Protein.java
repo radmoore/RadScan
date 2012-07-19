@@ -1,7 +1,6 @@
 package info.radm.radscan.ds;
 
 import info.radm.radscan.utils.MapUtilities;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,37 +102,51 @@ public class Protein implements Comparable<Protein>{
 	}
 	
 	
-	public void collapse(int repno) {
+	public void collapse(int repNo) {
 		ArrayList<Domain> collpasedDomains = new ArrayList<Domain>();
+		ArrayList<Domain> domainHolding = new ArrayList<Domain>();
 		
 		Domain lastDom = null;
-		int repLength = 1;
+
 		for (Domain cDom: domains) {
-			
 			if (lastDom == null) {
+				domainHolding.add(cDom);
 				lastDom = cDom;
 				continue;
 			}
 			
 			if (lastDom.did.equals(cDom.did))
-				repLength += 1;
+				domainHolding.add(cDom);
 			
 			else {
-				if (repLength >= repno) {
-					Domain firstRepDom = domains.get(domains.indexOf(cDom)-repLength);
-					Domain d = new Domain(lastDom.did, firstRepDom.from, lastDom.to);
-					d.addComment("collapsed "+repLength+" instances");
+				if ( domainHolding.size() >= repNo ) {
+					Domain firstRepDom = domainHolding.get(0);
+					Domain d = new Domain(firstRepDom.did, firstRepDom.from, lastDom.to);
+					d.addComment("collapsed "+domainHolding.size()+" instances");
 					d.addEvalue(-1);
 					collpasedDomains.add(d);
 				}
 				else {
-					collpasedDomains.add(lastDom);
+					for (Domain d : domainHolding)
+						collpasedDomains.add(d);
 				}
-				repLength = 1;
+				domainHolding.clear();
+				domainHolding.add(cDom);
 			}
 			lastDom = cDom;
+
 		}
-		collpasedDomains.add(lastDom);
+		if ( domainHolding.size() >= repNo ) {
+			Domain firstRepDom = domainHolding.get(0);
+			Domain d = new Domain(lastDom.did, firstRepDom.from, lastDom.to);
+			d.addComment("collapsed "+domainHolding.size()+" instances");
+			d.addEvalue(-1);
+			collpasedDomains.add(d);
+		}
+		else {
+			for (Domain d : domainHolding)
+				collpasedDomains.add(d);
+		}
 		this.domains = collpasedDomains;
 	}
 	

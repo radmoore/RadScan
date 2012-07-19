@@ -24,7 +24,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class RadScan {
 	
-	protected static final String VERSION = "0.4.2";
+	protected static final String VERSION = "0.4.3";
 	
 	public static void main (String[] args) {
 		
@@ -62,7 +62,7 @@ public class RadScan {
 	
 	            
 	            // set inputfile
-	            qBuilder.setQueryProtein(cl.getOptionValue("i"));
+	            qBuilder.setQueryProtein(cl.getOptionValue("in"));
 	
 	            // set algorithm
 	            if (cl.hasOption("a")) {
@@ -75,8 +75,8 @@ public class RadScan {
 	            
 	            // setup writer
 	            RadsWriter writer = null;
-	            if (cl.hasOption("o")) {			
-	            	String outFileName = cl.getOptionValue("o");
+	            if (cl.hasOption("out")) {			
+	            	String outFileName = cl.getOptionValue("out");
 					try {
 						writer = new RadsWriter(outFileName, "XDOM Results");
 					}
@@ -348,8 +348,7 @@ public class RadScan {
 	            .isRequired()
 	            .withDescription("Query: protein in XDOM or FASTA format")
 	            .hasArg()
-	            .withLongOpt("infile")
-	            .create("i");
+	            .create("in");
 		
 		@SuppressWarnings("static-access")
 		Option maxNumResults = OptionBuilder.withArgName( "int" )
@@ -374,8 +373,7 @@ public class RadScan {
 		Option resultFile = OptionBuilder.withArgName( "file" )
 	            .withDescription("Outfile for results (xdom)")
 	            .hasArg()
-	            .withLongOpt("out")
-	            .create("o");
+	            .create("out");
 		
 		@SuppressWarnings("static-access")
 		Option arrstr = OptionBuilder.withDescription("Return hits as string of domain IDs (separated by ;)")
