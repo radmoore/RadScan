@@ -15,6 +15,10 @@ public class Domain implements Comparable<Domain>{
 		this.to = to;
 	}
 	
+	public String getID() {
+		return this.did;
+	}
+	
 	public void addComment(String comment) {
 		this.comment = comment;
 	}
