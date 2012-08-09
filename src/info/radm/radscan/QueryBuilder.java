@@ -52,6 +52,23 @@ public class QueryBuilder implements RADSQuery{
 		}
 	}
 	
+	/**
+	 * 
+	 * @param queryXdom
+	 */
+	public void setQueryXdomString(String queryXdom) {
+		this.queryString = queryXdom;
+		this.format = RADSQuery.XDOM;
+	}
+	
+	/**
+	 * 
+	 * @param queryFasta
+	 */
+	public void setQueryFastaString(String queryFasta) {
+		this.queryString = queryFasta;
+		this.format = RADSQuery.FASTA;
+	}
 	
 	/**
 	 * 
