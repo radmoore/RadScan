@@ -58,4 +58,16 @@ public class Domain implements Comparable<Domain>{
 			return EQUAL;
 		
 	}
+	
+	public int getFrom() {
+		return this.from;
+	}
+	
+	public int getTo() {
+		return this.to;
+	}
+	
+	public double getEvalue() {
+		return this.evalue;
+	}
 }
