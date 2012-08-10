@@ -7,7 +7,8 @@ package info.radm.radscan;
  */
 public class RADSResults {
 
-	private String xdomURL, crampageOut, jobURL, jobID, runtime;
+	private static String outputBaseUrl = "http://rads.uni-muenster.de/output";
+	private String xdomURL, crampageOut, jobURL, jobID = null, runtime;
 	private int hits = 0;
 	private RADSQuery query;
 	private boolean rampageRun = false; 
@@ -87,6 +88,12 @@ public class RADSResults {
 	 */
 	public String getJobID() {
 		return this.jobID;
+	}
+	
+	public String getCrampageOutUrl() {
+		if (jobID == null)
+			return null;
+		return outputBaseUrl+"/"+jobID+".crampage.out";
 	}
 	
 	/**
