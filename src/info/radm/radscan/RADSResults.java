@@ -137,7 +137,7 @@ public class RADSResults {
 	 * @return
 	 */
 	public String getJobUrl() {
-		return this.jobID;
+		return RADSRunner.RADSQueryUrl+"jobid="+jobID;
 	}
 	
 	

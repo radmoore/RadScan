@@ -17,8 +17,8 @@ import java.net.URL;
 public class RADSRunner{
 
 	RADSQuery query;
-	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/";
-	public static String RADSQueryUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
+	public static String RADSBaseUrl = "http://rads.uni-muenster.de/";
+	public static String RADSQueryUrl = "http://rads.uni-muenster.de/rads3.pl?";
 	private static int INTERVAL = 5000;
 	private boolean running = false;
 	private ProgressBar pBar;
