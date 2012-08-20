@@ -67,9 +67,12 @@ public class RADSRunner{
 		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
-		            return null;
-//		            System.err.println("ERROR: "+msg);
-//		            System.exit(-1);
+		            if (msg.equals("ERROR: No domains in query"))
+		            	return null;
+		            else {
+		            	System.err.println(msg);
+		            	return null;
+		            }
 		        }
 
 				if (line.contains("preparing")) {
@@ -163,8 +166,12 @@ public class RADSRunner{
 		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
-		            System.err.println("ERROR: "+msg);
-		            System.exit(-1);
+		            if (msg.equals("ERROR: No domains in query"))
+		            	return null;
+		            else {
+		            	System.err.println(msg);
+		            	return null;
+		            }
 		        }
 				
 				if (line.contains("runtime")) {
