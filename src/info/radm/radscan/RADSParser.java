@@ -1,8 +1,8 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.ds.Domain;
-import info.radm.radscan.ds.Protein;
+import info.radm.radscan.ds.RADSDomain;
+import info.radm.radscan.ds.RADSProtein;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.util.TreeSet;
  *
  */
 
-public class Parser {
+public class RADSParser {
 	
 	private ProgressBar pbar;
 	private RADSQuery query;
@@ -30,14 +30,14 @@ public class Parser {
 	private List<Map.Entry<String, Integer>> scoreTable;
 	private HashMap<String, Integer> radsScores;
 	private HashMap<String, Integer> rampageScores;
-	private TreeSet<Protein> proteins = null;
+	private TreeSet<RADSProtein> proteins = null;
 
 	
 	/**
 	 * 
 	 * @param results
 	 */
-	public Parser(RADSResults results) {
+	public RADSParser(RADSResults results) {
 		this.results = results;
 		this.query = results.getQuery();
 		this.pbar = query.getProgressBar();
@@ -63,7 +63,7 @@ public class Parser {
 	}
 	
 	
-	public TreeSet<Protein> parse() {
+	public TreeSet<RADSProtein> parse() {
 		readScoreTable();
 		readHits();
 		return proteins;
@@ -80,8 +80,8 @@ public class Parser {
 		pbar.setMaxVal(maxHits);
 		BufferedReader reader = null;
 		int val = 0;
-		Protein p = null;
-		proteins = new TreeSet<Protein>();
+		RADSProtein p = null;
+		proteins = new TreeSet<RADSProtein>();
 		
 		try {
 			reader = read(results.getXdomUrl());
@@ -99,7 +99,7 @@ public class Parser {
 					if (p != null)
 						proteins.add(p);
 					
-					p = new Protein( pid, Integer.valueOf(fields[1]) );
+					p = new RADSProtein( pid, Integer.valueOf(fields[1]) );
 					p.setRADSScore(radsScores.get(pid));
 					if (query.isRampageRun())
 						p.setRAMPAGEScore(rampageScores.get(pid));
@@ -108,7 +108,7 @@ public class Parser {
 				}
 				else {
 					String[] fields = line.split("\\t");
-					Domain d = new Domain(fields[2], 
+					RADSDomain d = new RADSDomain(fields[2], 
 							Integer.valueOf(fields[0]), 
 							Integer.valueOf(fields[1]));
 					if (fields.length == 4)

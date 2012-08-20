@@ -1,9 +1,9 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.ds.Protein;
-import info.radm.radscan.utils.RadsMessenger;
-import info.radm.radscan.utils.RadsWriter;
+import info.radm.radscan.ds.RADSProtein;
+import info.radm.radscan.utils.RADSMessenger;
+import info.radm.radscan.utils.RADSWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
-public class RadScan {
+public class RADSScan {
 	
 	protected static final String VERSION = "0.4.3";
 	
@@ -33,7 +33,7 @@ public class RadScan {
 		f.setWidth(150);
 		f.setSyntaxPrefix("Usage: ");
 		
-		ArrayList<RadsWriter> writers = new ArrayList<RadsWriter>();
+		ArrayList<RADSWriter> writers = new ArrayList<RADSWriter>();
 		
 		try {
 			// add options
@@ -48,7 +48,7 @@ public class RadScan {
             }
             else {
 	            // construct a query
-	            QueryBuilder qBuilder = new QueryBuilder();
+	            RADSQueryBuilder qBuilder = new RADSQueryBuilder();
 	            
 	            // set to quiet mode
 	            if (cl.hasOption("q"))
@@ -74,11 +74,11 @@ public class RadScan {
 	            }
 	            
 	            // setup writer
-	            RadsWriter writer = null;
+	            RADSWriter writer = null;
 	            if (cl.hasOption("out")) {			
 	            	String outFileName = cl.getOptionValue("out");
 					try {
-						writer = new RadsWriter(outFileName, "XDOM Results");
+						writer = new RADSWriter(outFileName, "XDOM Results");
 					}
 					catch (IOException ioe) {
 						System.err.println("ERROR: could not create outfile: "+outFileName);
@@ -86,7 +86,7 @@ public class RadScan {
 					}	
 				}
 	            else 
-	            	writer = new RadsWriter();
+	            	writer = new RADSWriter();
 	            
 	            // add writer to list of used writers for later reporting
 	            writers.add(writer);
@@ -98,11 +98,15 @@ public class RadScan {
 				RADSQuery rQuery = qBuilder.build();
 				RADSRunner rads = new RADSRunner(rQuery);
 				RADSResults results = rads.submit();
-							
-				// Initiate parser
-				Parser resultParser = new Parser(results);
 				
-				TreeSet<Protein> proteins = resultParser.parse();
+				if (results == null) {
+					System.out.println("No results found");
+					System.exit(0);
+				}
+				// Initiate parser
+				RADSParser resultParser = new RADSParser(results);
+				
+				TreeSet<RADSProtein> proteins = resultParser.parse();
 				
 				boolean idMode = false; 
 				if (cl.hasOption("I"))
@@ -121,7 +125,7 @@ public class RadScan {
 					int repNo = Integer.valueOf(cl.getOptionValue("c"));
 					ProgressBar pbar = new ProgressBar(proteins.size(), "Collapsing repeats");
 					int i = 0;
-					for (Protein p : proteins) {
+					for (RADSProtein p : proteins) {
 						p.collapse(repNo);
 						pbar.setCurrentVal(i);
 						i++;
@@ -131,11 +135,11 @@ public class RadScan {
 				
 				//TODO: nicify output
 				if (cl.hasOption("u")) {
-					RadsWriter archWriter;
+					RADSWriter archWriter;
 					try {
-						archWriter = new RadsWriter(cl.getOptionValue("u"), "Frequency table of unique architectures");
+						archWriter = new RADSWriter(cl.getOptionValue("u"), "Frequency table of unique architectures");
 						writers.add(archWriter);
-						List<Entry<String, Integer>> uniqArchs = Protein.getUniqueArchitectures(proteins);
+						List<Entry<String, Integer>> uniqArchs = RADSProtein.getUniqueArchitectures(proteins);
 						for (Entry<String, Integer> e : uniqArchs)
 							archWriter.writeln(e.getKey()+"\t"+e.getValue());
 					} 
@@ -144,7 +148,7 @@ public class RadScan {
 					}	
 				}
 	
-				for (Protein p : proteins) {
+				for (RADSProtein p : proteins) {
 					current ++;
 					if (idMode)
 						writer.writeln(p.getID());
@@ -162,14 +166,14 @@ public class RadScan {
 					
 					String tblout = cl.getOptionValue("tbl");
 					try {
-						RadsWriter scoreWriter = new RadsWriter(tblout, "Score table");
+						RADSWriter scoreWriter = new RADSWriter(tblout, "Score table");
 						writers.add(scoreWriter);
 						String queryID = results.getQuery().getQueryID();
 						String outLine = "QUERY\tSUBJECT\tRADS";
 						if (results.getQuery().isRampageRun())
 							outLine += "\tRAMPAGE";
 						scoreWriter.writeln(outLine);
-						for (Protein p : proteins) {
+						for (RADSProtein p : proteins) {
 							outLine = queryID+"\t"+p.getID()+"\t"+p.getRADSScore();
 							if (results.getQuery().isRampageRun())
 								outLine += "\t"+p.getRAMPAGEScore();
@@ -184,10 +188,10 @@ public class RadScan {
 				}
 				
 				// inform of all outputfiles created (if any)
-				for (RadsWriter rw : writers) {
+				for (RADSWriter rw : writers) {
 					if (!qBuilder.isQuiet()) {
 						if (rw.isToFile()) {
-							RadsMessenger.writeMessage(rw.getFileDescription()+
+							RADSMessenger.writeMessage(rw.getFileDescription()+
 									" written to " +
 									rw.getOutFilePath());
 							rw.destroy();
@@ -197,8 +201,8 @@ public class RadScan {
 				
 				// RUN COMPLETE //
 				if (!qBuilder.isQuiet()) {
-					RadsMessenger.writeMessage("Scan complete.");
-					RadsMessenger.printHR();
+					RADSMessenger.writeMessage("Scan complete.");
+					RADSMessenger.printHR();
 				}
 			}
 		}
@@ -228,7 +232,7 @@ public class RadScan {
 	 * @param cl
 	 * @param qBuilder
 	 */
-	private static void setAlgorithm(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException {
+	private static void setAlgorithm(CommandLine cl, RADSQueryBuilder qBuilder) throws MissingOptionException {
     	String algo = cl.getOptionValue("algorithm");
     	if (algo.equals("RAMPAGE")) {
     		if (qBuilder.getFormat() == RADSQuery.XDOM) {
@@ -249,7 +253,7 @@ public class RadScan {
 	 * @param cl
 	 * @param qBuilder
 	 */
-	private static void setRampageOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException {
+	private static void setRampageOptions(CommandLine cl, RADSQueryBuilder qBuilder) throws MissingOptionException {
 		try {
 			
     		if (cl.hasOption("m"))
@@ -282,7 +286,7 @@ public class RadScan {
 	 * @param cl
 	 * @param qBuilder
 	 */
-	private static void setRadsOptions(CommandLine cl, QueryBuilder qBuilder) throws MissingOptionException{
+	private static void setRadsOptions(CommandLine cl, RADSQueryBuilder qBuilder) throws MissingOptionException{
 		try {
 			if (cl.hasOption("rads_G")) {
 				int G = Integer.valueOf(cl.getOptionValue("rampage_G"));
@@ -311,22 +315,22 @@ public class RadScan {
 	 * 
 	 * @param qBuilder
 	 */
-	private static void inform(QueryBuilder qBuilder) {
-		RadsMessenger.printBanner();
-		RadsMessenger.printHR();
-		RadsMessenger.writeTable("INPUT FILE", qBuilder.getFileName());
-		RadsMessenger.writeTable("QUERY PROTEIN", qBuilder.getQueryID());
-		RadsMessenger.writeTable("DATABASE", qBuilder.getDatabase());
-		RadsMessenger.writeTable("ALGORITHM", qBuilder.getAlgorithm());
+	private static void inform(RADSQueryBuilder qBuilder) {
+		RADSMessenger.printBanner();
+		RADSMessenger.printHR();
+		RADSMessenger.writeTable("INPUT FILE", qBuilder.getFileName());
+		RADSMessenger.writeTable("QUERY PROTEIN", qBuilder.getQueryID());
+		RADSMessenger.writeTable("DATABASE", qBuilder.getDatabase());
+		RADSMessenger.writeTable("ALGORITHM", qBuilder.getAlgorithm());
 		if (qBuilder.getAlgorithm().equals("RAMPAGE")) {
-			RadsMessenger.writeTable("MATRIX", qBuilder.getMatrix());	
+			RADSMessenger.writeTable("MATRIX", qBuilder.getMatrix());	
 		}
 		if (qBuilder.isFasta()) {
-			RadsMessenger.writeTable("FORMAT", "FASTA");
-			RadsMessenger.writeTable("SEQUENCE CHECKSUM", ""+qBuilder.getSeqChecksum());
+			RADSMessenger.writeTable("FORMAT", "FASTA");
+			RADSMessenger.writeTable("SEQUENCE CHECKSUM", ""+qBuilder.getSeqChecksum());
 		}
 		else
-			RadsMessenger.writeTable("FORMAT", "XDOM");
+			RADSMessenger.writeTable("FORMAT", "XDOM");
 	}
 	
 	/**

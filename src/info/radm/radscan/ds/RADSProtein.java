@@ -8,22 +8,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
-public class Protein implements Comparable<Protein>{
+public class RADSProtein implements Comparable<RADSProtein>{
 	
 	private String pid;
 	private int length, domNo, RADSscore, RAMPAGEscore;
-	private ArrayList<Domain> domains = new ArrayList<Domain>();
+	private ArrayList<RADSDomain> domains = new ArrayList<RADSDomain>();
 	private final String NEW_LINE = System.getProperty("line.separator");
 	private final int BEFORE = -1;
     private final int EQUAL = 0;
     private final int AFTER = 1;
     
-	public Protein (String pid, int length) {
+	public RADSProtein (String pid, int length) {
 		this.pid = pid;
 		this.length = length;
 	}
 	
-	public void addDomain(Domain d) {
+	public void addDomain(RADSDomain d) {
 		domains.add(d);
 		domNo ++;
 	}
@@ -66,14 +66,14 @@ public class Protein implements Comparable<Protein>{
 		return this.length;
 	}
 	
-	public ArrayList<Domain> getDomains() {
+	public ArrayList<RADSDomain> getDomains() {
 		return this.domains;
 	}
 	
 	public String toString() {
 		StringBuilder xdom = new StringBuilder();
 		xdom.append(">"+pid+"\t"+length+NEW_LINE);
-		for (Domain d : domains)
+		for (RADSDomain d : domains)
 			xdom.append(d.toString()+NEW_LINE);
 		return xdom.toString();
 	}
@@ -81,7 +81,7 @@ public class Protein implements Comparable<Protein>{
 	public String architecture() {
 		int pos = 0;
 		StringBuilder arch = new StringBuilder();
-		for (Domain d: domains) {
+		for (RADSDomain d: domains) {
 			if ( pos+1 == domains.size() ) {
 				arch.append(d.did);
 				break;
@@ -92,7 +92,7 @@ public class Protein implements Comparable<Protein>{
 		return arch.toString();
 	}
 
-	public int compareTo(Protein aProtein) {
+	public int compareTo(RADSProtein aProtein) {
 		if (this.RADSscore > aProtein.RADSscore)
 			return BEFORE;
 		else if (this.RADSscore < aProtein.RADSscore)
@@ -103,12 +103,12 @@ public class Protein implements Comparable<Protein>{
 	
 	
 	public void collapse(int repNo) {
-		ArrayList<Domain> collpasedDomains = new ArrayList<Domain>();
-		ArrayList<Domain> domainHolding = new ArrayList<Domain>();
+		ArrayList<RADSDomain> collpasedDomains = new ArrayList<RADSDomain>();
+		ArrayList<RADSDomain> domainHolding = new ArrayList<RADSDomain>();
 		
-		Domain lastDom = null;
+		RADSDomain lastDom = null;
 
-		for (Domain cDom: domains) {
+		for (RADSDomain cDom: domains) {
 			if (lastDom == null) {
 				domainHolding.add(cDom);
 				lastDom = cDom;
@@ -120,14 +120,14 @@ public class Protein implements Comparable<Protein>{
 			
 			else {
 				if ( domainHolding.size() >= repNo ) {
-					Domain firstRepDom = domainHolding.get(0);
-					Domain d = new Domain(firstRepDom.did, firstRepDom.from, lastDom.to);
+					RADSDomain firstRepDom = domainHolding.get(0);
+					RADSDomain d = new RADSDomain(firstRepDom.did, firstRepDom.from, lastDom.to);
 					d.addComment("collapsed "+domainHolding.size()+" instances");
 					d.addEvalue(-1);
 					collpasedDomains.add(d);
 				}
 				else {
-					for (Domain d : domainHolding)
+					for (RADSDomain d : domainHolding)
 						collpasedDomains.add(d);
 				}
 				domainHolding.clear();
@@ -137,14 +137,14 @@ public class Protein implements Comparable<Protein>{
 
 		}
 		if ( domainHolding.size() >= repNo ) {
-			Domain firstRepDom = domainHolding.get(0);
-			Domain d = new Domain(lastDom.did, firstRepDom.from, lastDom.to);
+			RADSDomain firstRepDom = domainHolding.get(0);
+			RADSDomain d = new RADSDomain(lastDom.did, firstRepDom.from, lastDom.to);
 			d.addComment("collapsed "+domainHolding.size()+" instances");
 			d.addEvalue(-1);
 			collpasedDomains.add(d);
 		}
 		else {
-			for (Domain d : domainHolding)
+			for (RADSDomain d : domainHolding)
 				collpasedDomains.add(d);
 		}
 		this.domains = collpasedDomains;
@@ -152,9 +152,9 @@ public class Protein implements Comparable<Protein>{
 	
 	
 	
-	public static List<Entry<String, Integer>> getUniqueArchitectures(TreeSet<Protein> proteins) {
+	public static List<Entry<String, Integer>> getUniqueArchitectures(TreeSet<RADSProtein> proteins) {
 		Map<String, Integer> uniqueArrs = new HashMap<String, Integer>();
-		for (Protein p : proteins) {
+		for (RADSProtein p : proteins) {
 			Integer freq = uniqueArrs.get(p.getArrString());
 			if (freq == null)
 				uniqueArrs.put(p.getArrString(), 1);

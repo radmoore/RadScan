@@ -1,7 +1,7 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.utils.RadsMessenger;
+import info.radm.radscan.utils.RADSMessenger;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -15,7 +15,7 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 
-public class QueryBuilder implements RADSQuery{
+public class RADSQueryBuilder implements RADSQuery{
 
 	private String queryString = null, queryID = "rawseq", querySequence = null;
 	private int format = -1;
@@ -34,7 +34,7 @@ public class QueryBuilder implements RADSQuery{
 	 * 
 	 * 
 	 */
-	public QueryBuilder() {	
+	public RADSQueryBuilder() {	
 		this.pBar = new ProgressBar("Inititating");
 	}
 	

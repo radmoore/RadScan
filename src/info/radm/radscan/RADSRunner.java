@@ -1,7 +1,7 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.utils.RadsMessenger;
+import info.radm.radscan.utils.RADSMessenger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,8 +67,9 @@ public class RADSRunner{
 		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
-		            System.err.println("ERROR: "+msg);
-		            System.exit(-1);
+		            return null;
+//		            System.err.println("ERROR: "+msg);
+//		            System.exit(-1);
 		        }
 
 				if (line.contains("preparing")) {
@@ -86,7 +87,7 @@ public class RADSRunner{
 					String[] fields = line.split("\\s+");
 					String jobUrl = fields[2].replace("\"", "");
 					if (!quiet)
-						RadsMessenger.writeTable("JOB ID", jobId);
+						RADSMessenger.writeTable("JOB ID", jobId);
 					results = intervalCheck(jobUrl, results);
 					break;
 				}

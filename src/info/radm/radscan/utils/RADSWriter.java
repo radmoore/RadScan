@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class RadsWriter {
+public class RADSWriter {
 
 	private File outFile = null;
 	private BufferedWriter bw = null;
@@ -13,14 +13,14 @@ public class RadsWriter {
 	private final String NEW_LINE = System.getProperty("line.separator");
 	private String desc = null;
 	
-	public RadsWriter(String outFile, String desc) throws IOException  {
+	public RADSWriter(String outFile, String desc) throws IOException  {
 		this.outFile = new File(outFile);
 		this.fw = new FileWriter(outFile);
 		this.bw = new BufferedWriter(fw);
 		this.desc = desc;
 	}
 	
-	public RadsWriter() { };
+	public RADSWriter() { };
 	
 	public boolean isStdOutMode() {
 		return (outFile == null);

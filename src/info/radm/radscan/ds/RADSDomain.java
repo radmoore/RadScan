@@ -1,6 +1,6 @@
 package info.radm.radscan.ds;
 
-public class Domain implements Comparable<Domain>{
+public class RADSDomain implements Comparable<RADSDomain>{
 	
 	protected String did, comment = null;
 	protected int from, to;
@@ -9,7 +9,7 @@ public class Domain implements Comparable<Domain>{
     private final int EQUAL = 0;
     private final int AFTER = 1;
 	
-	public Domain (String did, int from, int to) {
+	public RADSDomain (String did, int from, int to) {
 		this.did = did;
 		this.from = from;
 		this.to = to;
@@ -43,13 +43,13 @@ public class Domain implements Comparable<Domain>{
 		
 	}
 	
-	public boolean overlaps(Domain nextDom) {
+	public boolean overlaps(RADSDomain nextDom) {
 		if (this.to >= nextDom.from)
 			return true;
 		return false;
 	}
 	
-	public int compareTo(Domain other) {
+	public int compareTo(RADSDomain other) {
 		if (this.from < other.from)
 			return BEFORE;
 		else if (this.from > other.from)
