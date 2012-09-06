@@ -40,6 +40,9 @@ public class RADSResults {
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public void setRampageRun() {
 		this.rampageRun = true;
 	}
@@ -90,6 +93,10 @@ public class RADSResults {
 		return this.jobID;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public String getCrampageOutUrl() {
 		if (jobID == null)
 			return null;
@@ -140,7 +147,10 @@ public class RADSResults {
 		return RADSRunner.RADSQueryUrl+"jobid="+jobID;
 	}
 	
-	
+	/**
+	 * 
+	 * @return
+	 */
 	public String getCrampageOut() {
 		return RADSRunner.RADSBaseUrl+"/output/"+jobID+".crampage.out";
 	}

@@ -17,8 +17,8 @@ import java.net.URL;
 public class RADSRunner{
 
 	RADSQuery query;
-	public static String RADSBaseUrl = "http://rads.uni-muenster.de/";
-	public static String RADSQueryUrl = "http://rads.uni-muenster.de/rads3.pl?";
+	public static String RADSBaseUrl = "http://rads-dev.uni-muenster.de/";
+	public static String RADSQueryUrl = "http://rads-dev.uni-muenster.de/rads3.pl?";
 	private static int INTERVAL = 5000;
 	private boolean running = false;
 	private ProgressBar pBar;
@@ -52,7 +52,7 @@ public class RADSRunner{
 			if (!quiet)
 				pBar.startIntermediate();
 			
-			reader = read( this.query.getQueryString() );
+			reader = read( this.query.getRequestUrl() );
 			String line = null;
 			line = reader.readLine();
 			running = true;
@@ -206,9 +206,9 @@ public class RADSRunner{
 			reader.close();
 			
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println("Scan interruped.");
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			System.err.println("Malformed URL.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

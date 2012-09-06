@@ -17,7 +17,7 @@ import java.security.MessageDigest;
 
 public class RADSQueryBuilder implements RADSQuery{
 
-	private String queryString = null, queryID = "rawseq", querySequence = null;
+	private String queryString = null, queryID = "rawseq", querySequence = null, requestUrl = null;
 	private int format = -1;
 	private File queryFile;
 	private boolean quiet = false, benchmarkMode = false, rampageRun = false;
@@ -185,6 +185,14 @@ public class RADSQueryBuilder implements RADSQuery{
 		return queryString;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getRequestUrl() {
+		return requestUrl;
+	}
+	
 	
 	/**
 	 * 
@@ -309,14 +317,14 @@ public class RADSQueryBuilder implements RADSQuery{
 	 * construction
 	 */
 	public RADSQuery build() {
-		StringBuilder qString = new StringBuilder();
-		qString.append(RADSRunner.RADSQueryUrl);
+		StringBuilder resquestString = new StringBuilder();
+		resquestString.append(RADSRunner.RADSQueryUrl);
 		String urlAlgo = "algorithm=rads";
 		if (algo.equals("rampage"))
 			urlAlgo = "algorithm=rads&algorithm=rampage";
 			
 		try {
-			qString.append("apicall=1"+
+			resquestString.append("apicall=1"+
 					"&"+urlAlgo+
 					"&dbname="+database+
 					"&gp_rampage_M="+gp_rampage_M+
@@ -336,7 +344,7 @@ public class RADSQueryBuilder implements RADSQuery{
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		this.queryString = qString.toString();
+		this.requestUrl = resquestString.toString();
 		return this;
 	}
 

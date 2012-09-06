@@ -88,6 +88,7 @@ public class RADSParser {
 			String line = null;
 			
 			while ( (line = reader.readLine()) != null) {
+
 				if (line.substring(0, 1).equals(">")) {
 					
 					if ( (maxHits != -1) && (val >= maxHits) )
