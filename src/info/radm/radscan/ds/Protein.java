@@ -98,7 +98,7 @@ public class Protein implements Comparable<Protein>{
 		else if (this.RADSscore < aProtein.RADSscore)
 			return AFTER;
 		else
-			return EQUAL;
+			 return this.pid.compareTo(aProtein.pid);
 	}
 	
 	
