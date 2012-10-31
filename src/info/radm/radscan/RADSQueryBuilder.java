@@ -1,7 +1,7 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.utils.RadsMessenger;
+import info.radm.radscan.utils.RADSMessenger;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -15,9 +15,9 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 
-public class QueryBuilder implements RADSQuery{
+public class RADSQueryBuilder implements RADSQuery{
 
-	private String queryString = null, queryID = "rawseq", querySequence = null;
+	private String queryString = null, queryID = "rawseq", querySequence = null, requestUrl = null;
 	private int format = -1;
 	private File queryFile;
 	private boolean quiet = false, benchmarkMode = false, rampageRun = false;
@@ -34,7 +34,7 @@ public class QueryBuilder implements RADSQuery{
 	 * 
 	 * 
 	 */
-	public QueryBuilder() {	
+	public RADSQueryBuilder() {	
 		this.pBar = new ProgressBar("Inititating");
 	}
 	
@@ -52,6 +52,23 @@ public class QueryBuilder implements RADSQuery{
 		}
 	}
 	
+	/**
+	 * 
+	 * @param queryXdom
+	 */
+	public void setQueryXdomString(String queryXdom) {
+		this.queryString = queryXdom;
+		this.format = RADSQuery.XDOM;
+	}
+	
+	/**
+	 * 
+	 * @param queryFasta
+	 */
+	public void setQueryFastaString(String queryFasta) {
+		this.queryString = queryFasta;
+		this.format = RADSQuery.FASTA;
+	}
 	
 	/**
 	 * 
@@ -166,6 +183,14 @@ public class QueryBuilder implements RADSQuery{
 	 */
 	public String getQueryString() {
 		return queryString;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getRequestUrl() {
+		return requestUrl;
 	}
 	
 	
@@ -292,14 +317,14 @@ public class QueryBuilder implements RADSQuery{
 	 * construction
 	 */
 	public RADSQuery build() {
-		StringBuilder qString = new StringBuilder();
-		qString.append(RADSRunner.RADSQueryUrl);
+		StringBuilder resquestString = new StringBuilder();
+		resquestString.append(RADSRunner.RADSQueryUrl);
 		String urlAlgo = "algorithm=rads";
 		if (algo.equals("rampage"))
 			urlAlgo = "algorithm=rads&algorithm=rampage";
 			
 		try {
-			qString.append("apicall=1"+
+			resquestString.append("apicall=1"+
 					"&"+urlAlgo+
 					"&dbname="+database+
 					"&gp_rampage_M="+gp_rampage_M+
@@ -319,7 +344,7 @@ public class QueryBuilder implements RADSQuery{
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		this.queryString = qString.toString();
+		this.requestUrl = resquestString.toString();
 		return this;
 	}
 

@@ -1,7 +1,7 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.utils.RadsMessenger;
+import info.radm.radscan.utils.RADSMessenger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class RADSRunner{
 			if (!quiet)
 				pBar.startIntermediate();
 			
-			reader = read( this.query.getQueryString() );
+			reader = read( this.query.getRequestUrl() );
 			String line = null;
 			line = reader.readLine();
 			running = true;
@@ -67,8 +67,12 @@ public class RADSRunner{
 		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
-		            System.err.println("ERROR: "+msg);
-		            System.exit(-1);
+		            if (msg.equals("ERROR: No domains in query"))
+		            	return null;
+		            else {
+		            	System.err.println(msg);
+		            	return null;
+		            }
 		        }
 
 				if (line.contains("preparing")) {
@@ -86,7 +90,7 @@ public class RADSRunner{
 					String[] fields = line.split("\\s+");
 					String jobUrl = fields[2].replace("\"", "");
 					if (!quiet)
-						RadsMessenger.writeTable("JOB ID", jobId);
+						RADSMessenger.writeTable("JOB ID", jobId);
 					results = intervalCheck(jobUrl, results);
 					break;
 				}
@@ -162,8 +166,12 @@ public class RADSRunner{
 		        	String[] fields = line.split(": ");
 		            String msg = fields[1].replace("\"", "");
 		            pBar.finish(true);
-		            System.err.println("ERROR: "+msg);
-		            System.exit(-1);
+		            if (msg.equals("ERROR: No domains in query"))
+		            	return null;
+		            else {
+		            	System.err.println(msg);
+		            	return null;
+		            }
 		        }
 				
 				if (line.contains("runtime")) {
@@ -198,9 +206,9 @@ public class RADSRunner{
 			reader.close();
 			
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println("Scan interruped.");
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			System.err.println("Malformed URL.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

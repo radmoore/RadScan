@@ -12,6 +12,8 @@ public interface RADSQuery {
 	
 	public String getQueryString();
 	
+	public String getRequestUrl();
+	
 	public String getQueryID();
 
 	public boolean isQuiet();

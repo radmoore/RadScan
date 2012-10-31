@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
  * @author <a href="http://radm.info">Andrew D. Moore</a>
  *
  */
-public class RadsMessenger {
+public class RADSMessenger {
 
 	private static String radsTextLogo = "resources/rads_text_logo.txt";
 	
@@ -52,7 +52,7 @@ public class RadsMessenger {
 	 * 
 	 */
 	public static void printBanner() {
-		InputStream is = RadsMessenger.class.getResourceAsStream(radsTextLogo);
+		InputStream is = RADSMessenger.class.getResourceAsStream(radsTextLogo);
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
 		
 		String line;
