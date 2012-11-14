@@ -1,8 +1,8 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.ds.RADSDomain;
-import info.radm.radscan.ds.RADSProtein;
+import info.radm.radscan.model.RADSDomain;
+import info.radm.radscan.model.RADSProtein;
 
 import java.io.BufferedReader;
 import java.io.IOException;

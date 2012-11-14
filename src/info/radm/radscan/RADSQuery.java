@@ -28,6 +28,10 @@ public interface RADSQuery {
 	
 	public String getAlgorithm();
 	
+	public String getQuerySequence();
+	
+	public String getSequenceChecksum();
+	
 	// TODO:
 	// getQueryFile
 	// getSequence ?

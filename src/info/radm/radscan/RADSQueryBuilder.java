@@ -58,6 +58,8 @@ public class RADSQueryBuilder implements RADSQuery{
 	 */
 	public void setQueryXdomString(String queryXdom) {
 		this.queryString = queryXdom;
+		String[] fields = queryXdom.split("\\n");
+		this.queryID = fields[0].replaceFirst(">", "");
 		this.format = RADSQuery.XDOM;
 	}
 	
@@ -67,6 +69,10 @@ public class RADSQueryBuilder implements RADSQuery{
 	 */
 	public void setQueryFastaString(String queryFasta) {
 		this.queryString = queryFasta;
+		String[] fields = queryFasta.split("\\n");
+		this.queryID = fields[0].replaceFirst(">", "");
+		this.querySequence = fields[1];
+		generateSequenceChecksum(fields[1]);
 		this.format = RADSQuery.FASTA;
 	}
 	
@@ -132,6 +138,10 @@ public class RADSQueryBuilder implements RADSQuery{
 	public boolean isRampageRun() {
 		return this.rampageRun;
 	}	
+	
+	public String getQuerySequence() {
+		return this.querySequence;
+	}
 	
 	/**
 	 * 
@@ -214,7 +224,7 @@ public class RADSQueryBuilder implements RADSQuery{
 	 * 
 	 * @return
 	 */
-	public String getSeqChecksum() {
+	public String getSequenceChecksum() {
 		return this.seqChecksum;
 	}
 	
@@ -441,13 +451,11 @@ public class RADSQueryBuilder implements RADSQuery{
             MessageDigest msg = MessageDigest.getInstance("MD5");
             msg.update(sequence.getBytes(), 0, sequence.length());
             String digest = new BigInteger(1, msg.digest()).toString(16);
-            this.seqChecksum = digest;
+            this.seqChecksum = digest.toUpperCase();
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-
-	
 }

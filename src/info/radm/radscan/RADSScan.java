@@ -1,7 +1,7 @@
 package info.radm.radscan;
 
 import info.radm.pbar.ProgressBar;
-import info.radm.radscan.ds.RADSProtein;
+import info.radm.radscan.model.RADSProtein;
 import info.radm.radscan.utils.RADSMessenger;
 import info.radm.radscan.utils.RADSWriter;
 
@@ -327,7 +327,7 @@ public class RADSScan {
 		}
 		if (qBuilder.isFasta()) {
 			RADSMessenger.writeTable("FORMAT", "FASTA");
-			RADSMessenger.writeTable("SEQUENCE CHECKSUM", ""+qBuilder.getSeqChecksum());
+			RADSMessenger.writeTable("SEQUENCE CHECKSUM", ""+qBuilder.getSequenceChecksum());
 		}
 		else
 			RADSMessenger.writeTable("FORMAT", "XDOM");
